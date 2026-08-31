@@ -108,8 +108,12 @@ The controller side needs a one-time setup first, see
 install the package:
 
 ```
-pip install -e .
+pip install fanuc
 ```
+
+For development instead (running the test suite, editing the source),
+clone the repo and install in editable mode with the `dev` extra:
+`pip install -e ".[dev]"`.
 
 ## Quick start
 
@@ -187,7 +191,7 @@ this into your shell's config file and it's permanent; only needs
 running once):
 
 ```bash
-pip install -e ".[complete]"
+pip install "fanuc[complete]"
 eval "$(register-python-argcomplete fanuc)"
 ```
 

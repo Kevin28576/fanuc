@@ -79,8 +79,11 @@
 [docs/zh/controller-setup.md](docs/zh/controller-setup.md)。設定好之後裝套件：
 
 ```
-pip install -e .
+pip install fanuc
 ```
+
+如果是要開發（跑測試、改原始碼），改成把 repo clone 下來，用 editable
+模式裝 `dev` extra：`pip install -e ".[dev]"`。
 
 ## 快速開始
 
@@ -153,7 +156,7 @@ with FanucRobot(host="127.0.0.1") as robot:
 生效，只有第一次要手動跑）：
 
 ```bash
-pip install -e ".[complete]"
+pip install "fanuc[complete]"
 eval "$(register-python-argcomplete fanuc)"
 ```
 
