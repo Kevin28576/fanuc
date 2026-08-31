@@ -302,7 +302,7 @@ ROUTINE CHECK_JOINT(cmd: STRING): STRING
 -- what the actual limit values are.
 --
 -- jpos must be typed JOINTPOS6, not the generic JOINTPOS; otherwise
--- CNV_REL_JPOS throws INTP-311 "parameter not yet set". The MOVEJ
+-- CNV_REL_JPOS throws INTP-311 "Uninitialized data is used". The MOVEJ
 -- routine (mappdk_cmd.kl) also uses JOINTPOS6; this stays consistent
 -- with it.
 ----------------------------------------------------
