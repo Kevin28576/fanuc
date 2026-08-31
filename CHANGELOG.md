@@ -6,6 +6,18 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.4] - 2026-08-31
+
+Final release under the `fanuc` PyPI name. The project is renamed to
+`fanuc-python` going forward (same repository, same source, same
+import name `fanuc` and CLI command `fanuc`; only the PyPI
+distribution name changes) to avoid using FANUC Corporation's bare
+trademark as a standalone package name, matching the naming
+convention every other FANUC-related PyPI package already follows
+(`fanucpy`, `pyfanuc`, `UnderAutomation.Fanuc`). See
+[fanuc-python on PyPI](https://pypi.org/project/fanuc-python/) for all
+releases after this one.
+
 ## [1.1.3] - 2026-08-31
 
 ### Added
@@ -149,7 +161,8 @@ release. Kept here for the record of what that snapshot looked like.
 - `py.typed` marker; the whole `src/fanuc/` package passes
   `mypy --strict`.
 
-[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.3...HEAD
+[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.4-fanuc-final...HEAD
+[1.1.4]: https://github.com/Kevin28576/fanuc/compare/v1.1.3...v1.1.4-fanuc-final
 [1.1.3]: https://github.com/Kevin28576/fanuc/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/Kevin28576/fanuc/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/Kevin28576/fanuc/compare/v1.1.0...v1.1.1
