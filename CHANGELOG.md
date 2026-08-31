@@ -28,6 +28,13 @@ releases from here on.
 - `unofficial`/`third-party` keywords in `pyproject.toml`, alongside
   the existing disclaimer, to make the non-affiliation clear wherever
   the package is discovered, not just on the README.
+- Expanded the ROBOGUIDE-first warning and moved it up to right below
+  the disclaimer, at the very top of both READMEs: built-in
+  safeguards (the `--confirm` gate, legality checks) should prevent
+  most accidents under ordinary conditions, but certain conditions or
+  configurations can still produce unexpected behavior, so testing on
+  a virtual controller before pointing at real hardware is strongly
+  recommended.
 
 ## [1.1.3] - 2026-08-31
 

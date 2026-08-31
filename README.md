@@ -9,6 +9,17 @@
 > FANUC and any other trademarks referenced here are the property of
 > their respective owners.
 
+> [!WARNING]
+> Under ordinary conditions, this package's built-in safeguards (the
+> `--confirm` gate on motion and program commands, the legality
+> checks before a move) should prevent most accidents, but under
+> certain conditions or configurations, unexpected behavior can still
+> happen. Strongly recommended: develop and test on a ROBOGUIDE
+> virtual controller first, confirm the logic works as expected, and
+> only then point `host` at a real controller's IP, so a mistake in
+> your own program logic doesn't play out unexpectedly on real
+> hardware.
+
 > This project was inspired by the following theses, journal articles,
 > and conference papers (Traditional Chinese, with an English gloss of
 > each title):
@@ -68,12 +79,6 @@ This repository has two parts:
 - **`driver/`**: the KAREL/TP driver that runs on the controller and does the other end of that talking
 
 ![Communication protocol between the Python package and the controller](https://raw.githubusercontent.com/Kevin28576/fanuc/main/media/CommProtocol.svg)
-
-> [!WARNING]
-> Strongly recommended: develop and test on a ROBOGUIDE virtual
-> controller first, confirm the logic works, and only then point
-> `host` at a real controller. That way a mistake in your own logic
-> doesn't play out unexpectedly on real hardware.
 
 > [!CAUTION]
 > MAPPDK's wire protocol has no authentication and no encryption,
