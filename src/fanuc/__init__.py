@@ -39,7 +39,7 @@ from .trace import MotionTracer, TraceSample
 from .transport import MappdkTransport
 from .types import Alarm, Joints, Pose
 
-__version__ = "1.1.0"
+__version__ = "1.1.1"
 
 __all__ = [
     "FanucRobot",

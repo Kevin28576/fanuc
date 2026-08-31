@@ -6,6 +6,24 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-08-31
+
+### Added
+
+- A PyPI downloads badge in both READMEs.
+
+### Fixed
+
+- `README.md`/`README.zh.md`'s architecture diagram used a relative
+  path (`media/CommProtocol.svg`), which only renders on GitHub's own
+  repo page; PyPI's project page (which renders `README.md` as the
+  package description) couldn't display it. Switched to an absolute
+  `raw.githubusercontent.com` URL, which works wherever the README is
+  displayed. This release exists specifically to get that fix (and
+  the downloads badge) onto PyPI's project page, since PyPI freezes
+  the README at whatever it was when a version was published and
+  doesn't pick up later changes to the same version.
+
 ## [1.1.0] - 2026-08-31
 
 ### Added
@@ -113,6 +131,7 @@ release. Kept here for the record of what that snapshot looked like.
 - `py.typed` marker; the whole `src/fanuc/` package passes
   `mypy --strict`.
 
-[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.0...HEAD
+[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.1...HEAD
+[1.1.1]: https://github.com/Kevin28576/fanuc/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/Kevin28576/fanuc/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Kevin28576/fanuc/compare/7351db2...545003e

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fanuc"
-version = "1.1.0"
+version = "1.1.1"
 description = "A toolkit for talking to a FANUC robot from Python (MAPPDK protocol)"
 readme = "README.md"
 requires-python = ">=3.9"
