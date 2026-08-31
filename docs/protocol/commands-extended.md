@@ -77,7 +77,7 @@ downside is it can only answer "is this position legal", not what the
 actual limit values are. A pure query, never moves the robot.
 
 `J_IN_RANGE` needs the `JOINTPOS6` type, not the generic `JOINTPOS`, or
-it throws `INTP-311 參數還沒有設定` — and does so by hanging the
+it throws `INTP-311 參數還沒有設定`, and does so by hanging the
 entire server, with no response and no connection error (the Python
 side just times out). The `MOVEJ` routine has always used `JOINTPOS6`,
 so this follows the same convention and never had trouble.

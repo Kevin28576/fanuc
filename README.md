@@ -68,7 +68,7 @@ This repository has two parts:
 > doesn't play out unexpectedly on real hardware.
 
 > [!CAUTION]
-> MAPPDK's wire protocol has no authentication and no encryption —
+> MAPPDK's wire protocol has no authentication and no encryption,
 > plain text over a plain TCP socket. Anyone who can reach the
 > controller's port (18735, and 18736 if S7 is set up) can send it
 > motion commands, register writes, and system-variable writes, no
@@ -77,7 +77,7 @@ This repository has two parts:
 > can fix in software. **Never expose these ports to an untrusted
 > network.** Keep the controller on an isolated, machine-only network
 > with no path to the open internet or a general office/production
-> LAN — reachability to that network is equivalent to physical access
+> LAN; reachability to that network is equivalent to physical access
 > to the robot. Moving off the default ports doesn't add
 > authentication, but it's straightforward and worth doing anyway; see
 > [docs/controller-setup/server-tags.md](docs/controller-setup/server-tags.md#using-a-non-default-port).
@@ -120,7 +120,7 @@ with FanucRobot(host="127.0.0.1") as robot:
     robot.move_joint([0, 0, 0, 0, -90, 0], velocity=25)
 ```
 
-Connect, read position, move — that's the basic usage. For the
+Connect, read position, move: that's the basic usage. For the
 gripper, registers, and exception handling, see [Python API](#python-api)
 below.
 
@@ -193,7 +193,7 @@ eval "$(register-python-argcomplete fanuc)"
 After that, `fanuc <TAB>` lists subcommands like `pos`/`watch`/`connect`,
 and option names (`--host`, `--gripper-travel`) complete too. Only
 bash, zsh, tcsh, and fish are supported (a limitation of the
-`argcomplete` package itself) — **PowerShell has no equivalent
+`argcomplete` package itself). **PowerShell has no equivalent
 mechanism, so installing this extra won't do anything there.** Skipping
 this extra doesn't affect any other CLI functionality, it just means
 no TAB completion.
@@ -243,7 +243,7 @@ standalone usage is in
 
 `ee_DO_num` is for a single-signal gripper: one output directly
 corresponds to open/close. Pneumatic grippers are often wired
-differently — open and close are two independent signals (e.g. a
+differently: open and close are two independent signals (e.g. a
 SCHUNK EGP), not the same signal inverted, and switching between them
 needs a minimum rest time; switching too fast can damage the
 gripper's internal electronics. This kind of wiring uses
@@ -282,13 +282,13 @@ actually wired**:
   closing, a different thing from the signal-switch rest time
   (`GRIPPER_REST_S`, an electrical characteristic roughly the same
   across this kind of gripper, built into the package). Travel time is
-  physical movement time — it depends on gripper size, air pressure,
+  physical movement time; it depends on gripper size, air pressure,
   and stroke length, and varies per gripper with no safe universal
   default, so it has to come from your spec sheet or an actual
   measurement
 - `gripper()` waits the full travel time after sending the signal
   before returning, so that by the time the call returns the gripper
-  has actually finished moving — the next action (e.g. carrying a
+  has actually finished moving; the next action (e.g. carrying a
   workpiece away) won't happen while the gripper is still mid-travel
 
 ### Exceptions
@@ -401,13 +401,13 @@ with tests first, then wire it into `robot.py`.
 
 ## Commands the driver supports
 
-The base commands — motion, digital I/O, reading position — come from
+The base commands (motion, digital I/O, reading position) come from
 the original driver; this project adds 15 more (`ver`, `getreg`,
 `setreg`, `getpreg`, `setpreg`, `getdin`, `getsysvar`, `getalarm`,
 `chkjnt`, `chkpos`, `setsysvarnum`, `getsreg`, `setsreg`, `getjpreg`,
 `setjpreg`), all verified on real hardware, details in
 [docs/protocol.md](docs/protocol.md). `getalarm` currently only reads
-the most recent alarm, not history — see that document.
+the most recent alarm, not history; see that document.
 
 `connect()` sends `ver` to check this, telling whether the controller
 has this project's extended driver loaded. If not, `robot.extended`
@@ -426,8 +426,8 @@ To try a new command, `robot.send_raw("...")` sends a raw string directly.
 
 ## The driver/ directory
 
-The KAREL programs that run on the controller — source, compiled
-output, and the files to upload are kept separate:
+The KAREL programs that run on the controller: source, compiled
+output, and the files to upload are kept separate.
 
 | What you want | Where to look |
 | --- | --- |
