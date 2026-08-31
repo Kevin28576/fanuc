@@ -318,7 +318,7 @@ src/fanuc/
 └── exceptions.py  例外
 ```
 
-protocol 層不碰 socket，所以指令格式可以離線測。`tests/` 有 87 個測試，
+protocol 層不碰 socket，所以指令格式可以離線測。`tests/` 有 123 個測試，
 不需要 ROBOGUIDE 也不需要實機：
 
 ```
@@ -326,11 +326,11 @@ pytest
 ```
 
 覆蓋率（要先裝 `dev` extra，`pip install -e ".[dev]"`）整體大約
-54%，故意分佈不均：`protocol.py`/`types.py` 純邏輯、離線就能完整測，
-覆蓋率在 80-90% 左右；`cli.py`、`transport.py` 要碰真的 socket 或
-命令列解析，沒有實機/實跑就測不到，覆蓋率只有 0-25%。目前各檔案的
-覆蓋率明細看 [codecov 面板](https://codecov.io/gh/Kevin28576/fanuc)，
-或本機自己跑：
+77%，故意分佈不均：`protocol.py`/`types.py`/`cli.py` 純邏輯（`cli.py`
+是參數解析跟分派，也能完全離線 mock），覆蓋率在 80-90% 左右；
+`transport.py` 要碰真的 socket 才能測到大部分程式碼路徑，覆蓋率
+只有 25%。目前各檔案的覆蓋率明細看
+[codecov 面板](https://codecov.io/gh/Kevin28576/fanuc)，或本機自己跑：
 
 ```
 pytest --cov=fanuc --cov-report=term-missing

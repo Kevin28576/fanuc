@@ -15,6 +15,11 @@ this project follows [Semantic Versioning](https://semver.org/).
   MAPPDK wire protocol) in both READMEs and `docs/protocol.md`, plus a
   step-by-step guide for moving off the default ports in
   `docs/controller-setup/server-tags.md`.
+- `CHANGELOG.md` (this file), linked from both READMEs.
+- `tests/test_cli.py`: offline tests for the `fanuc` command-line tool
+  (connect/pos/watch/io/move/call/reg/din/chkjnt/chkpos/power/status,
+  plus `main()`'s exception handling), bringing `cli.py`'s test
+  coverage from 0% to 98% and the project total from 54% to 77%.
 
 ### Fixed
 
