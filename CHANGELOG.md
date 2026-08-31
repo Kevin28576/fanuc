@@ -6,6 +6,8 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-08-31
+
 ### Added
 
 - CI now runs on every push/PR (`.github/workflows/ci.yml`), separate
@@ -83,7 +85,9 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [1.0.0] - 2026-08-31
 
-Initial public release.
+Where the project stood right after the first commit. Never actually
+tagged or published; folded straight into 1.1.0, the first real PyPI
+release. Kept here for the record of what that snapshot looked like.
 
 ### Added
 
@@ -109,5 +113,6 @@ Initial public release.
 - `py.typed` marker; the whole `src/fanuc/` package passes
   `mypy --strict`.
 
-[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/Kevin28576/fanuc/releases/tag/v1.0.0
+[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/Kevin28576/fanuc/releases/tag/v1.1.0
+[1.0.0]: https://github.com/Kevin28576/fanuc/compare/7351db2...545003e
