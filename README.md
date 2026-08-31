@@ -43,6 +43,7 @@ who provided the physical space and resources to work with the robot.
 Thank you.
 
 [![PyPI](https://img.shields.io/pypi/v/fanuc)](https://pypi.org/project/fanuc/)
+[![Downloads](https://img.shields.io/pypi/dm/fanuc)](https://pypistats.org/packages/fanuc)
 [![Python versions](https://img.shields.io/pypi/pyversions/fanuc)](https://pypi.org/project/fanuc/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![CI](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml/badge.svg)](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml)
@@ -59,7 +60,7 @@ This repository has two parts:
 - **`src/fanuc/`**: the Python package, talking to the controller over a plain TCP socket
 - **`driver/`**: the KAREL/TP driver that runs on the controller and does the other end of that talking
 
-![Communication protocol between the Python package and the controller](media/CommProtocol.svg)
+![Communication protocol between the Python package and the controller](https://raw.githubusercontent.com/Kevin28576/fanuc/main/media/CommProtocol.svg)
 
 > [!WARNING]
 > Strongly recommended: develop and test on a ROBOGUIDE virtual

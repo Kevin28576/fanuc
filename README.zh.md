@@ -20,6 +20,7 @@
 提供機器使用空間與相關資源，特此致謝。
 
 [![PyPI](https://img.shields.io/pypi/v/fanuc)](https://pypi.org/project/fanuc/)
+[![Downloads](https://img.shields.io/pypi/dm/fanuc)](https://pypistats.org/packages/fanuc)
 [![Python versions](https://img.shields.io/pypi/pyversions/fanuc)](https://pypi.org/project/fanuc/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![CI](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml/badge.svg)](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml)
@@ -34,7 +35,7 @@
 - **`src/fanuc/`**：Python 套件，透過一般 TCP socket 跟控制器通訊
 - **`driver/`**：跑在控制器上的 KAREL/TP driver，負責通訊的另一端
 
-![Python 套件跟控制器之間的通訊協定](media/CommProtocol.svg)
+![Python 套件跟控制器之間的通訊協定](https://raw.githubusercontent.com/Kevin28576/fanuc/main/media/CommProtocol.svg)
 
 > [!WARNING]
 > 強烈建議先在 ROBOGUIDE 虛擬控制器上開發、測試，確認邏輯沒問題之後，
