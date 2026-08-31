@@ -45,7 +45,8 @@ Thank you.
 [![PyPI](https://img.shields.io/pypi/v/fanuc)](https://pypi.org/project/fanuc/)
 [![Python versions](https://img.shields.io/pypi/pyversions/fanuc)](https://pypi.org/project/fanuc/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
-[![CI](https://github.com/Kevin28576/fanuc/actions/workflows/publish.yml/badge.svg)](https://github.com/Kevin28576/fanuc/actions/workflows/publish.yml)
+[![CI](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml/badge.svg)](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Kevin28576/fanuc/branch/main/graph/badge.svg)](https://codecov.io/gh/Kevin28576/fanuc)
 
 A toolkit for controlling a FANUC robot from Python, built on the
 MAPPDK KAREL driver. Reads and writes the current position, joint
@@ -96,6 +97,7 @@ This repository has two parts:
 - [Commands the driver supports](#commands-the-driver-supports)
 - [The driver/ directory](#the-driver-directory)
 - [Directory layout](#directory-layout)
+- [Changelog](#changelog)
 - [License](#license)
 
 ## Install
@@ -375,11 +377,23 @@ src/fanuc/
 ```
 
 The protocol layer never touches a socket, so command formats can be
-tested offline. `tests/` has 86 tests, no ROBOGUIDE or real hardware
+tested offline. `tests/` has 87 tests, no ROBOGUIDE or real hardware
 needed:
 
 ```
 pytest
+```
+
+Coverage (needs the `dev` extra, `pip install -e ".[dev]"`) is around
+54% overall, uneven by design: `protocol.py`/`types.py` are in the
+high 80s-90s since they're pure logic and fully testable offline,
+`cli.py` and `transport.py` sit near 0-25% since they need a real
+socket or argument parsing that isn't exercised without real
+hardware. See the [codecov dashboard](https://codecov.io/gh/Kevin28576/fanuc)
+for the current per-file breakdown, or run it locally:
+
+```
+pytest --cov=fanuc --cov-report=term-missing
 ```
 
 To add a new command: write `encode_*` / `parse_*` in `protocol.py`
@@ -445,6 +459,10 @@ fanuc/
 ├── driver/      KAREL source (driver/upload/ is what gets uploaded to the controller)
 └── docs/        setup and protocol docs (docs/zh/ is the Chinese version, structure matches)
 ```
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

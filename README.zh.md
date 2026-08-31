@@ -22,7 +22,8 @@
 [![PyPI](https://img.shields.io/pypi/v/fanuc)](https://pypi.org/project/fanuc/)
 [![Python versions](https://img.shields.io/pypi/pyversions/fanuc)](https://pypi.org/project/fanuc/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
-[![CI](https://github.com/Kevin28576/fanuc/actions/workflows/publish.yml/badge.svg)](https://github.com/Kevin28576/fanuc/actions/workflows/publish.yml)
+[![CI](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml/badge.svg)](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/Kevin28576/fanuc/branch/main/graph/badge.svg)](https://codecov.io/gh/Kevin28576/fanuc)
 
 用 Python 操作 FANUC 機器人的工具，底層是 MAPPDK 的 KAREL driver。可以讀寫
 目前位置、關節角度、暫存器、數位 I/O，控制夾爪開合，下移動指令、跑 TP
@@ -68,6 +69,7 @@
 - [driver 支援的指令](#driver-支援的指令)
 - [driver/ 目錄](#driver-目錄)
 - [目錄結構](#目錄結構)
+- [版本紀錄](#版本紀錄)
 - [授權](#授權)
 
 ## 安裝
@@ -316,11 +318,22 @@ src/fanuc/
 └── exceptions.py  例外
 ```
 
-protocol 層不碰 socket，所以指令格式可以離線測。`tests/` 有 86 個測試，
+protocol 層不碰 socket，所以指令格式可以離線測。`tests/` 有 87 個測試，
 不需要 ROBOGUIDE 也不需要實機：
 
 ```
 pytest
+```
+
+覆蓋率（要先裝 `dev` extra，`pip install -e ".[dev]"`）整體大約
+54%，故意分佈不均：`protocol.py`/`types.py` 純邏輯、離線就能完整測，
+覆蓋率在 80-90% 左右；`cli.py`、`transport.py` 要碰真的 socket 或
+命令列解析，沒有實機/實跑就測不到，覆蓋率只有 0-25%。目前各檔案的
+覆蓋率明細看 [codecov 面板](https://codecov.io/gh/Kevin28576/fanuc)，
+或本機自己跑：
+
+```
+pytest --cov=fanuc --cov-report=term-missing
 ```
 
 加新指令的順序：先在 `protocol.py` 寫 `encode_*` / `parse_*` 加測試，再接 `robot.py`。
@@ -380,6 +393,10 @@ fanuc/
 ├── driver/      KAREL 原始碼（driver/upload/ 是要上傳到控制器的檔案）
 └── docs/        設定與協定文件（英文，docs/zh/ 是中文版，結構一一對應）
 ```
+
+## 版本紀錄
+
+見 [CHANGELOG.md](CHANGELOG.md)（英文，這份沒有另外做中文版）。
 
 ## 授權
 
