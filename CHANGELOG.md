@@ -8,15 +8,26 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [1.1.4] - 2026-08-31
 
-Final release under the `fanuc` PyPI name. The project is renamed to
-`fanuc-python` going forward (same repository, same source, same
-import name `fanuc` and CLI command `fanuc`; only the PyPI
-distribution name changes) to avoid using FANUC Corporation's bare
-trademark as a standalone package name, matching the naming
-convention every other FANUC-related PyPI package already follows
-(`fanucpy`, `pyfanuc`, `UnderAutomation.Fanuc`). See
+Renamed the PyPI distribution from `fanuc` to `fanuc-python`, to avoid
+using FANUC Corporation's bare trademark as a standalone package name
+and match the naming convention every other FANUC-related PyPI
+package already follows (`fanucpy`, `pyfanuc`, `UnderAutomation.Fanuc`).
+Nothing else changes: same repository, same source, same import name
+`fanuc`, same CLI command `fanuc`; only the name you `pip install`
+changes.
+
+A final `1.1.4` was also published under the old `fanuc` name as a
+goodbye notice pointing here, with an offer to FANUC Corporation to
+reserve, transfer, or otherwise handle the name differently if they'd
+like; no further releases will be made under that name. See
 [fanuc-python on PyPI](https://pypi.org/project/fanuc-python/) for all
-releases after this one.
+releases from here on.
+
+### Added
+
+- `unofficial`/`third-party` keywords in `pyproject.toml`, alongside
+  the existing disclaimer, to make the non-affiliation clear wherever
+  the package is discovered, not just on the README.
 
 ## [1.1.3] - 2026-08-31
 

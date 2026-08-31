@@ -24,9 +24,9 @@
 實機測試環境由[萬能科技大學資訊工程系暨研究所、電資研究所](https://www.csie.vnu.edu.tw/)
 提供機器使用空間與相關資源，特此致謝。
 
-[![PyPI](https://img.shields.io/pypi/v/fanuc)](https://pypi.org/project/fanuc/)
-[![Downloads](https://img.shields.io/pypi/dm/fanuc)](https://pypistats.org/packages/fanuc)
-[![Python versions](https://img.shields.io/pypi/pyversions/fanuc)](https://pypi.org/project/fanuc/)
+[![PyPI](https://img.shields.io/pypi/v/fanuc-python)](https://pypi.org/project/fanuc-python/)
+[![Downloads](https://img.shields.io/pypi/dm/fanuc-python)](https://pypistats.org/packages/fanuc-python)
+[![Python versions](https://img.shields.io/pypi/pyversions/fanuc-python)](https://pypi.org/project/fanuc-python/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![CI](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml/badge.svg)](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/Kevin28576/fanuc/branch/main/graph/badge.svg)](https://codecov.io/gh/Kevin28576/fanuc)
@@ -84,8 +84,12 @@
 [docs/zh/controller-setup.md](docs/zh/controller-setup.md)。設定好之後裝套件：
 
 ```
-pip install fanuc
+pip install fanuc-python
 ```
+
+PyPI 上的套件名稱是 `fanuc-python`，但 Python import 跟 CLI 指令都還是
+`fanuc`（`from fanuc import FanucRobot`、`fanuc pos`），只有
+`pip install` 打的名字變了，其他都沒動。
 
 如果是要開發（跑測試、改原始碼），改成把 repo clone 下來，用 editable
 模式裝 `dev` extra：`pip install -e ".[dev]"`。
@@ -161,7 +165,7 @@ with FanucRobot(host="127.0.0.1") as robot:
 生效，只有第一次要手動跑）：
 
 ```bash
-pip install "fanuc[complete]"
+pip install "fanuc-python[complete]"
 eval "$(register-python-argcomplete fanuc)"
 ```
 
