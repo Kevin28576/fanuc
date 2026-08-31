@@ -6,6 +6,8 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.3] - 2026-08-31
+
 ### Added
 
 - A disclaimer at the top of both READMEs stating this is an
@@ -147,7 +149,8 @@ release. Kept here for the record of what that snapshot looked like.
 - `py.typed` marker; the whole `src/fanuc/` package passes
   `mypy --strict`.
 
-[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.2...HEAD
+[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.3...HEAD
+[1.1.3]: https://github.com/Kevin28576/fanuc/compare/v1.1.2...v1.1.3
 [1.1.2]: https://github.com/Kevin28576/fanuc/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/Kevin28576/fanuc/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/Kevin28576/fanuc/releases/tag/v1.1.0
