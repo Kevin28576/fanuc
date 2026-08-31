@@ -319,7 +319,7 @@ src/fanuc/
 ```
 
 protocol 層不碰 socket，所以指令格式可以離線測；`transport.py` 則是用
-真的 loopback TCP server 測，不是靠 mock。`tests/` 有 179 個測試，
+真的 loopback TCP server 測，不是靠 mock。`tests/` 有 188 個測試，
 不需要 ROBOGUIDE 也不需要實機：
 
 ```
@@ -327,7 +327,7 @@ pytest
 ```
 
 覆蓋率（要先裝 `dev` extra，`pip install -e ".[dev]"`）整體大約
-93%。目前各檔案的覆蓋率明細看
+94%。目前各檔案的覆蓋率明細看
 [codecov 面板](https://codecov.io/gh/Kevin28576/fanuc)，或本機自己跑：
 
 ```

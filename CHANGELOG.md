@@ -30,7 +30,14 @@ this project follows [Semantic Versioning](https://semver.org/).
   registers, I/O, the extended-driver-only commands, the joint/pose
   legality checks, the end-effector edge cases), mocking `_send`
   directly rather than needing a real controller. Brought `robot.py`'s
-  test coverage from 53% to 94% and the project total to 93% overall.
+  test coverage from 53% to 94%.
+- `tests/test_i18n.py`: tests for `_detect_chinese()`'s language
+  detection (env var precedence, OS locale fallback, the
+  no-usable-signal default) and `bi()`, calling `_detect_chinese()`
+  directly with the environment monkeypatched since it otherwise only
+  ever runs once, at import time, against whatever the process's own
+  environment happens to be. Brought `_i18n.py`'s test coverage from
+  75% to 100% and the project total to 94% overall.
 
 ### Fixed
 
