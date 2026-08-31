@@ -43,7 +43,7 @@ who provided the physical space and resources to work with the robot.
 Thank you.
 
 [![PyPI](https://img.shields.io/pypi/v/fanuc)](https://pypi.org/project/fanuc/)
-[![Downloads](https://img.shields.io/pypi/dm/fanuc)](https://pypistats.org/packages/fanuc)
+[![Downloads](https://static.pepy.tech/badge/fanuc)](https://pepy.tech/project/fanuc)
 [![Python versions](https://img.shields.io/pypi/pyversions/fanuc)](https://pypi.org/project/fanuc/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![CI](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml/badge.svg)](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml)
