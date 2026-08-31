@@ -2,6 +2,13 @@
 
 *[中文版](README.zh.md)*
 
+> [!IMPORTANT]
+> **Disclaimer**: this is an independent, third-party open-source
+> project. The author is not affiliated with, authorized by,
+> sponsored by, or endorsed by FANUC CORPORATION in any way. FANUC
+> and any other trademarks referenced here are the property of their
+> respective owners.
+
 > This project was inspired by the following theses, journal articles,
 > and conference papers (Traditional Chinese, with an English gloss of
 > each title):

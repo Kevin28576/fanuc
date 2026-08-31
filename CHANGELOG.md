@@ -6,6 +6,12 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- A disclaimer at the top of both READMEs stating this is an
+  independent third-party project with no affiliation to, sponsorship
+  from, or endorsement by FANUC CORPORATION.
+
 ## [1.1.2] - 2026-08-31
 
 ### Changed
