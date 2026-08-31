@@ -959,3 +959,146 @@ def test_gripper_travel_string_parsed_correctly():
     r = FanucRobot(ee_DO_type="RDO", ee_DO_num=7, gripper_travel="250ms")
     assert r.gripper_travel == "250ms"          # original string kept
     assert r._gripper_travel_s == 0.25           # parsed into seconds internally
+
+
+# -- Remaining encoders not otherwise exercised above -------------------------
+
+def test_encode_curpos_curjpos_ins_pwr_exit():
+    assert p.encode_curpos() == "curpos"
+    assert p.encode_curjpos() == "curjpos"
+    assert p.encode_ins_pwr() == "ins_pwr"
+    assert p.encode_exit() == "exit"
+
+
+def test_encode_call_prog_rejects_empty_name():
+    with pytest.raises(ValueError):
+        p.encode_call_prog("   ")
+
+
+def test_move_rejects_out_of_range_acceleration_and_cnt():
+    with pytest.raises(ValueError):
+        p.encode_move("joint", [0], acceleration=10000)
+    with pytest.raises(ValueError):
+        p.encode_move("joint", [0], cnt_val=101)
+
+
+def test_move_rejects_empty_vals():
+    with pytest.raises(ValueError):
+        p.encode_move("joint", [])
+
+
+# -- Pose / Joints sequence protocol -------------------------------------------
+
+def test_pose_getitem_index_and_slice():
+    pose = Pose(1, 2, 3, 4, 5, 6)
+    assert pose[0] == 1
+    assert pose[1:3] == [2, 3]
+
+
+def test_joints_iter_len_and_getitem():
+    joints = Joints((10.0, 20.0, 30.0))
+    assert list(iter(joints)) == [10.0, 20.0, 30.0]
+    assert len(joints) == 3
+    assert joints[1] == 20.0
+    assert joints[0:2] == (10.0, 20.0)
+
+
+def test_check_rdo_rejects_non_int():
+    with pytest.raises(TypeError):
+        p.encode_get_rdo(True)  # bool is an int subclass, must still be rejected
+    with pytest.raises(TypeError):
+        p.encode_get_rdo("1")  # type: ignore[arg-type]
+
+
+def test_check_dout_rejects_non_int_and_out_of_range():
+    with pytest.raises(TypeError):
+        p.encode_get_dout(True)
+    with pytest.raises(ValueError):
+        p.encode_get_dout(0)
+    with pytest.raises(ValueError):
+        p.encode_get_dout(100000)
+
+
+def test_set_sys_var_rejects_empty_name():
+    with pytest.raises(ValueError):
+        p.encode_set_sys_var("   ", True)
+
+
+def test_check_reg_rejects_non_int_and_out_of_range():
+    with pytest.raises(TypeError):
+        p.encode_get_reg(True)
+    with pytest.raises(ValueError):
+        p.encode_get_reg(0)
+    with pytest.raises(ValueError):
+        p.encode_get_reg(100000)
+
+
+def test_encode_get_din_rejects_non_int_and_out_of_range():
+    with pytest.raises(TypeError):
+        p.encode_get_din(True)
+    with pytest.raises(ValueError):
+        p.encode_get_din(0)
+    with pytest.raises(ValueError):
+        p.encode_get_din(100000)
+
+
+def test_encode_get_sys_var_rejects_empty_name_and_colon():
+    with pytest.raises(ValueError):
+        p.encode_get_sys_var("   ")
+    with pytest.raises(ValueError):
+        p.encode_get_sys_var("bad:name")
+
+
+def test_encode_set_sys_var_num_rejects_empty_name():
+    with pytest.raises(ValueError):
+        p.encode_set_sys_var_num("   ", 1)
+
+
+def test_parse_pairs_rejects_a_response_with_no_values():
+    with pytest.raises(ProtocolError):
+        p._parse_labelled("", "cartesian pose")
+
+
+def test_parse_int_rejects_garbage():
+    with pytest.raises(ProtocolError):
+        p.parse_int("not-a-number")
+
+
+def test_parse_power_kw_rejects_garbage():
+    with pytest.raises(ProtocolError):
+        p.parse_power_kw("not-a-number")
+
+
+def test_parse_alarm_rejects_a_field_missing_the_equals_sign():
+    with pytest.raises(ProtocolError):
+        p.parse_alarm("id=1,sev=2,cause=3,time=4,prog=P,BADFIELD")
+
+
+def test_parse_alarm_rejects_a_non_numeric_field():
+    with pytest.raises(ProtocolError):
+        p.parse_alarm("id=x,sev=2,cause=3,time=4,prog=P,msg=hello")
+
+
+def test_robot_app_abstract_method_stub_bodies():
+    """configure()/_main() are abstract, but each still has a body (a
+    NotImplementedError raise) rather than a bare ``...``, in case a
+    subclass calls super().configure()/super()._main() by mistake
+    instead of overriding it outright."""
+    from fanuc.app import RobotApp
+
+    class Incomplete(RobotApp):
+        def __init__(self, robot):
+            self.robot = robot
+
+        def configure(self):
+            super().configure()
+
+        def _main(self, **kwargs):
+            super()._main()
+
+    robot = _FakeRobot()
+    app = Incomplete(robot)
+    with pytest.raises(NotImplementedError):
+        app.configure()
+    with pytest.raises(NotImplementedError):
+        app._main()

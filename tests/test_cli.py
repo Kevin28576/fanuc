@@ -355,3 +355,64 @@ def test_main_reports_keyboard_interrupt(monkeypatch, capsys):
 
     monkeypatch.setattr(FanucRobot, "get_curpos", _boom)
     assert main(["pos"]) == 130
+
+
+def test_main_skips_autocomplete_when_argcomplete_is_not_installed(monkeypatch):
+    """argcomplete is an optional extra; main() must still work when
+    it isn't installed, not just when it is."""
+    import fanuc.cli as cli_module
+
+    monkeypatch.setattr(cli_module, "argcomplete", None)
+    monkeypatch.setattr(FanucRobot, "get_curpos", lambda self: Pose(0, 0, 0, 0, 0, 0))
+    monkeypatch.setattr(FanucRobot, "get_curjpos", lambda self: Joints.from_list([0, 0, 0, 0, -90, 0]))
+    assert main(["pos"]) == 0
+
+
+def test_module_main_guards_run_main_and_exit(monkeypatch):
+    """Both fanuc/cli.py's own ``if __name__ == "__main__":`` and
+    fanuc/__main__.py exist so ``python -m fanuc`` and a direct
+    ``python fanuc/cli.py`` both work. runpy actually executes the
+    module body with __name__ set to "__main__", in-process, so
+    coverage can see it (a subprocess wouldn't need Codecov's
+    subprocess measurement wired up)."""
+    import runpy
+
+    monkeypatch.setattr(FanucRobot, "get_curpos", lambda self: Pose(0, 0, 0, 0, 0, 0))
+    monkeypatch.setattr(FanucRobot, "get_curjpos", lambda self: Joints.from_list([0, 0, 0, 0, -90, 0]))
+    monkeypatch.setattr("sys.argv", ["fanuc", "pos"])
+
+    with pytest.raises(SystemExit) as exc_info:
+        runpy.run_module("fanuc.cli", run_name="__main__")
+    assert exc_info.value.code == 0
+
+    with pytest.raises(SystemExit) as exc_info:
+        runpy.run_module("fanuc.__main__", run_name="__main__")
+    assert exc_info.value.code == 0
+
+
+def test_main_module_guard_is_skipped_on_a_normal_import():
+    """A plain ``import fanuc.__main__`` (as opposed to running it via
+    runpy with run_name="__main__" above) must not call main() itself:
+    __name__ is "fanuc.__main__" here, not "__main__", so the guard's
+    body has to stay unreached."""
+    import fanuc.__main__  # noqa: F401
+
+
+def test_argcomplete_missing_falls_back_to_none(monkeypatch):
+    """argcomplete ships no stubs and is only an optional extra
+    (the `complete` extra); cli.py must still import cleanly with
+    argcomplete.argcomplete set to None when the package genuinely
+    isn't installed. sys.modules[name] = None is the standard trick
+    to force the next `import argcomplete` to raise ImportError."""
+    import importlib
+    import sys
+
+    import fanuc.cli as cli_module
+
+    monkeypatch.setitem(sys.modules, "argcomplete", None)
+    try:
+        importlib.reload(cli_module)
+        assert cli_module.argcomplete is None
+    finally:
+        monkeypatch.undo()
+        importlib.reload(cli_module)  # restore the real argcomplete for later tests

@@ -378,15 +378,17 @@ src/fanuc/
 
 The protocol layer never touches a socket, so command formats can be
 tested offline; `transport.py` is exercised with a real loopback TCP
-server instead of mocks. `tests/` has 188 tests, no ROBOGUIDE or real
+server instead of mocks. `tests/` has 220 tests, no ROBOGUIDE or real
 hardware needed:
 
 ```
 pytest
 ```
 
-Coverage (needs the `dev` extra, `pip install -e ".[dev]"`) is around
-94% overall. See the
+Coverage (needs the `dev` extra, `pip install -e ".[dev]"`) is
+currently 100% line and branch, every path reachable offline through
+real sockets, fakes, or mocks. That's a statement about what the test
+suite exercises, not a claim the code is bug-free. See the
 [codecov dashboard](https://codecov.io/gh/Kevin28576/fanuc) for the
 current per-file breakdown, or run it locally:
 

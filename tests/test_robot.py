@@ -464,3 +464,63 @@ def test_get_gripper_without_any_output_number_configured():
     robot = FanucRobot(ee_DO_type="RDO")
     with pytest.raises(ValueError):
         robot.get_gripper()
+
+
+def test_gripper_and_get_gripper_use_the_do_output_type(monkeypatch):
+    """The dual-branch _set_ee_do/_get_ee_do also has a DO path
+    (RDO is the only one exercised by test_protocol.py's gripper
+    timing tests)."""
+    robot = FanucRobot(ee_DO_type="DO", ee_DO_num=3, gripper_travel="0ms")
+    seen = {}
+
+    def _fake_send(cmd, retry=True):
+        seen["set_cmd"] = cmd
+        return "success"
+
+    monkeypatch.setattr(robot, "_send", _fake_send)
+    robot.gripper(True)
+    assert seen["set_cmd"].startswith("setdout:")
+
+    monkeypatch.setattr(robot, "_send", lambda *a, **kw: "1")
+    assert robot.get_gripper() == 1
+
+
+def test_dual_signal_gripper_property():
+    dual = FanucRobot(ee_DO_type="RDO", ee_open_num=7, ee_close_num=8, gripper_travel="500ms")
+    assert dual._dual_signal_gripper is True
+
+    single = FanucRobot(ee_DO_type="RDO", ee_DO_num=7, gripper_travel="500ms")
+    assert single._dual_signal_gripper is False
+
+
+def test_check_joint_ignores_an_axis_without_a_limit_table_entry(extended_robot, monkeypatch):
+    """A 7th axis (external axis, e.g. a turntable) has no entry in
+    joint_limits_deg; the per-axis diagnostic must skip it instead of
+    raising a KeyError, leaving the table-covered axes as the only
+    possible diagnosis."""
+    monkeypatch.setattr(extended_robot, "_send", lambda *a, **kw: "0")
+    result = extended_robot.check_joint([0, 200, 0, 0, -90, 0, 999])
+    assert bool(result) is False
+    assert len(result.violations) == 1
+    assert result.violations[0].axis == "J2"
+
+
+# -- module-level completeness predicates --------------------------------------
+
+def test_complete_fields_predicate():
+    from fanuc.robot import _complete_fields
+
+    check = _complete_fields(3)
+    assert check("0:1,2,3") is True
+    assert check("0:1,2") is False
+    assert check("1:some-error") is True  # error responses short-circuit as complete
+    assert check("no-colon-yet") is False
+
+
+def test_complete_joints_predicate():
+    from fanuc.robot import _complete_joints
+
+    assert _complete_joints("0:j=0,j=0,j=0,j=0,j=0,j=0") is True
+    assert _complete_joints("0:j=0,j=0") is False
+    assert _complete_joints("1:some-error") is True
+    assert _complete_joints("no-colon-yet") is False

@@ -293,6 +293,67 @@ def test_send_failure_disconnects_and_raises():
     assert transport.connected is False
 
 
+def test_drain_swallows_a_plain_os_error_too(monkeypatch):
+    """_drain treats a bare OSError the same as a timeout: nothing
+    else was actually sitting in the buffer, not an error worth
+    surfacing to the caller (the main recv loop already handles a real
+    connection failure on its own next read)."""
+    transport = _connected_transport(recv_sequence=[b"0:success\n", OSError("would block")])
+    result = transport.send("exit")
+    assert result == "0:success"
+
+
+def test_recv_loops_again_when_the_drained_bytes_still_are_not_complete():
+    """Every predicate this project actually hands to the transport is
+    monotonic (more comma-separated fields never un-completes a
+    response), so this path can't happen with real usage; it's tested
+    directly with an artificial predicate that flips True/False on
+    each call, standing in for the general case the code has to
+    handle regardless: is_complete says done, _drain finds more data,
+    but re-checking against the updated text says not done after all.
+    The loop then has to go around for another normal (non-drain)
+    recv rather than returning early or raising.
+    """
+    calls = {"n": 0}
+
+    def alternates(text):
+        calls["n"] += 1
+        return calls["n"] % 2 == 1
+
+    transport = _connected_transport(recv_sequence=[b"0:a", b"b", b"c", b""])
+    result = transport.send("curjpos", is_complete=alternates)
+    assert result == "0:abc"
+
+
+def test_setsockopt_failure_is_swallowed(fake_server, monkeypatch):
+    """TCP_NODELAY is unsupported on a handful of platforms; connect()
+    must still succeed."""
+    def _fail_setsockopt(self, *args, **kwargs):
+        raise OSError("setsockopt not supported")
+
+    monkeypatch.setattr(socket.socket, "setsockopt", _fail_setsockopt)
+    server = fake_server(responses=[])
+    transport = MappdkTransport("127.0.0.1", server.port, timeout=2)
+
+    greeting = transport.connect()
+
+    assert greeting == "0:success"
+    transport.disconnect()
+
+
+def test_disconnect_swallows_a_close_failure():
+    """A close() that itself raises must not prevent disconnect() from
+    still marking the transport as disconnected."""
+    transport = _connected_transport()
+
+    def _fail_close():
+        raise OSError("already closed at the OS level")
+
+    transport._sock.close = _fail_close  # type: ignore[method-assign]
+    transport.disconnect()  # must not raise
+    assert transport.connected is False
+
+
 def test_send_uses_a_custom_is_complete_predicate():
     """A predicate stricter than the default (colon present) keeps
     reading until it's satisfied, not just until the first colon."""

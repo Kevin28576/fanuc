@@ -64,11 +64,13 @@ testpaths = ["tests"]
 [tool.coverage.run]
 source = ["fanuc"]
 branch = true
-# Nothing omitted on purpose: transport.py's actual socket I/O and
-# cli.py's argument parsing genuinely aren't exercised by the offline
-# test suite (see tests/test_protocol.py's own docstring on this), and
-# the coverage number should say so honestly rather than hide it by
-# excluding those files.
+# Nothing omitted on purpose. transport.py's socket I/O is exercised
+# with a real loopback TCP server plus a hand-rolled fake socket for
+# the error paths (see tests/test_transport.py); cli.py's argument
+# parsing and dispatch is fully mockable and covered the same way
+# (see tests/test_cli.py). The project is genuinely at 100% right now;
+# if that ever drops, the honest number should show it rather than
+# hiding the gap by excluding files.
 
 [[tool.mypy.overrides]]
 # argcomplete is an optional dependency (see [complete] above) and

@@ -37,7 +37,17 @@ this project follows [Semantic Versioning](https://semver.org/).
   directly with the environment monkeypatched since it otherwise only
   ever runs once, at import time, against whatever the process's own
   environment happens to be. Brought `_i18n.py`'s test coverage from
-  75% to 100% and the project total to 94% overall.
+  75% to 100%.
+- Added targeted tests closing the remaining gaps in `protocol.py`,
+  `robot.py`, `app.py`, `types.py`, `transport.py`, `cli.py`, and
+  `__main__.py`: every previously-uncovered validation branch,
+  parsing error path, sequence-protocol dunder, and the two module
+  entry-point guards (exercised in-process via `runpy` rather than a
+  subprocess, so coverage.py can see them). `cli.py`'s
+  `argcomplete`-not-installed branch is tested by forcing the import
+  to fail with `sys.modules["argcomplete"] = None` and reloading the
+  module. Brought the project total from 94% to 100% line and branch
+  coverage.
 
 ### Fixed
 
