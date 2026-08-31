@@ -16,10 +16,10 @@ Nothing else changes: same repository, same source, same import name
 `fanuc`, same CLI command `fanuc`; only the name you `pip install`
 changes.
 
-A final `1.1.4` was also published under the old `fanuc` name as a
-goodbye notice pointing here, with an offer to FANUC Corporation to
-reserve, transfer, or otherwise handle the name differently if they'd
-like; no further releases will be made under that name. See
+A final `1.1.4` was briefly published under the old `fanuc` name as a
+goodbye notice pointing here; that PyPI project has since been deleted
+entirely rather than left as a stub, so `pip install fanuc` no longer
+resolves to anything. See
 [fanuc-python on PyPI](https://pypi.org/project/fanuc-python/) for all
 releases from here on.
 
