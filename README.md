@@ -377,19 +377,16 @@ src/fanuc/
 ```
 
 The protocol layer never touches a socket, so command formats can be
-tested offline. `tests/` has 123 tests, no ROBOGUIDE or real hardware
-needed:
+tested offline; `transport.py` is exercised with a real loopback TCP
+server instead of mocks. `tests/` has 179 tests, no ROBOGUIDE or real
+hardware needed:
 
 ```
 pytest
 ```
 
 Coverage (needs the `dev` extra, `pip install -e ".[dev]"`) is around
-77% overall, uneven by design: `protocol.py`/`types.py`/`cli.py` are
-in the high 80s-90s since they're pure logic (or, for `cli.py`,
-argument parsing and dispatch that's fully mockable) and testable
-offline; `transport.py` sits at 25% since it needs a real socket to
-exercise most of its code paths. See the
+93% overall. See the
 [codecov dashboard](https://codecov.io/gh/Kevin28576/fanuc) for the
 current per-file breakdown, or run it locally:
 

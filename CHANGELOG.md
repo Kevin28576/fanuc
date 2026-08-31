@@ -20,9 +20,30 @@ this project follows [Semantic Versioning](https://semver.org/).
   (connect/pos/watch/io/move/call/reg/din/chkjnt/chkpos/power/status,
   plus `main()`'s exception handling), bringing `cli.py`'s test
   coverage from 0% to 98% and the project total from 54% to 77%.
+- `tests/test_transport.py`: tests for `MappdkTransport`, using both a
+  real loopback TCP server and a hand-rolled fake socket for the error
+  paths that are impractical to provoke reliably over a real socket
+  (timeout, peer close, a response that never terminates), bringing
+  `transport.py`'s test coverage from 25% to 94%.
+- `tests/test_robot.py`: offline tests for `FanucRobot`'s command
+  construction and response parsing (connect/disconnect, motion,
+  registers, I/O, the extended-driver-only commands, the joint/pose
+  legality checks, the end-effector edge cases), mocking `_send`
+  directly rather than needing a real controller. Brought `robot.py`'s
+  test coverage from 53% to 94% and the project total to 93% overall.
 
 ### Fixed
 
+- `transport.py`'s response reassembly had a latent bug: once a
+  response that arrived split across two TCP packets was confirmed
+  complete after draining the trailing bytes, the code fell through to
+  another blocking `recv()` instead of returning right away. In real
+  usage the peer has nothing more to send at that point, so this would
+  have hung until the socket timeout. Found while writing
+  `tests/test_transport.py`'s split-packet regression test, which is
+  the first test in this project to actually exercise that code path;
+  fixed by re-checking completeness against the drained data before
+  falling through to another read.
 - `MotionTracer`'s background polling thread only caught `FanucError`;
   any other exception (a bug, or in one case a test double running
   dry) crashed the thread with an uncaught traceback printed to

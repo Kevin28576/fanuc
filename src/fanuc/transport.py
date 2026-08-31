@@ -211,9 +211,17 @@ class MappdkTransport:
                     return text.strip()
                 chunks.append(trailing)
                 text = b"".join(chunks).decode(self.encoding, errors="replace")
-                # More data arrived; loop back and re-check completeness
-                # against the updated text instead of trusting the
-                # earlier is_complete result.
+                # More data arrived; re-check completeness against the
+                # updated text instead of trusting the earlier
+                # is_complete result. Actually checking here (rather
+                # than just falling through to another blocking recv)
+                # matters: with the drained bytes folded in, the
+                # response is normally complete right now, and the
+                # peer has nothing more to send until the next
+                # command -- an unconditional extra recv() would just
+                # sit there until it times out.
+                if is_complete(text):
+                    return text.strip()
 
             if len(text) > BUFFER_SIZE * 4:
                 self.disconnect()
