@@ -56,7 +56,7 @@ showed passing different numbers in always returns the same entry; the
 full debugging story behind this is in
 [debugging notes](debugging-notes.md#alarm-history-cant-be-read). That
 approach has since been removed; to see full alarm history, go
-directly to the TP's `报警` → `履历` screen for now.
+directly to the TP's `報警` → `履歷` screen for now.
 
 The message can contain commas, so it's the last field, and parsing
 only splits on the first five commas. `ERR_DATA` returns 7 fields at
@@ -77,7 +77,7 @@ downside is it can only answer "is this position legal", not what the
 actual limit values are. A pure query, never moves the robot.
 
 `J_IN_RANGE` needs the `JOINTPOS6` type, not the generic `JOINTPOS`, or
-it throws `INTP-311 参数还没有设定` — and does so by hanging the
+it throws `INTP-311 參數還沒有設定` — and does so by hanging the
 entire server, with no response and no connection error (the Python
 side just times out). The `MOVEJ` routine has always used `JOINTPOS6`,
 so this follows the same convention and never had trouble.

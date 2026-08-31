@@ -25,8 +25,8 @@ newly copied files show up.
 
 ## Loading from the TP
 
-`菜单` → `文件` → `文件` → `功能` → `设置设备` → select `UD1:` →
-move the cursor to the filename → `ENTER` → `加载`. Answer YES when
+`MENU` → `FILE` → `FILE` → `UTIL` → `Set Device` → select `UD1:` →
+move the cursor to the filename → `ENTER` → `LOAD`. Answer YES when
 asked whether to overwrite.
 
 **Load the two `.pc` files first, then the three `.ls` files.** Doing
@@ -36,7 +36,7 @@ it less likely to miss a file.
 ### `.ls` won't load
 
 `.ls` is ASCII source, and needs the **ASCII Upload (R507)** option;
-without it you'll see `文件加载错误` or `选项未安装`.
+without it you'll see `File Load Error` or `Option Not Installed`.
 
 Without that option, use ROBOGUIDE's own translator instead (its
 interface is English, unaffected by the TP's language): Cell Browser
@@ -46,7 +46,7 @@ translates it to `.tp` and loads it.
 
 ## Confirming it loaded
 
-`一览` → `类型` → `全部` should show:
+`SELECT` → `Type` → `ALL` should show:
 
 ```
 MAPPDK           [MAPPDK MAIN]
@@ -59,8 +59,8 @@ MAPPDK_SERVER  PC
 (No `MAPPDK_LOGGER` line if S7 wasn't loaded; that's expected.)
 
 Entries marked `PC` are compiled KAREL and only show up under the
-`KAREL程序` category; the rest are TP programs and show up under
-`TP程序`.
+`KAREL Programs` category; the rest are TP programs and show up under
+`TP Programs`.
 
 Done loading? Continue to [running it](running.md).
 

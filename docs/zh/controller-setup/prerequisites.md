@@ -3,8 +3,12 @@
 ROBOGUIDE 虛擬控制器的一次性設定，設定存在 workcell 裡，之後每次開機
 只要跑 MAPPDK，不用重設。
 
-TP 選單用簡體標示，各版本用詞略有出入（例如 `装载` / `加载`）。
-系統變數名稱永遠是英文，不會翻譯。
+TP 的選單語言跟著控制器本身的設定走。這份文件假設 TP 是繁體中文模式；
+英文版（[Prerequisites](../../controller-setup/prerequisites.md)）
+假設的是 TP 設成英文模式，兩邊選單名稱各自對照各自的語言。
+
+TP 選單用詞各版本略有出入（例如 `裝載` / `加載`）。系統變數名稱不論
+TP 設定哪種語言，永遠是英文。
 
 ## 控制器上跑的是兩支 server
 
@@ -27,12 +31,12 @@ UFRAME/UTOOL。driver 是同步阻塞的，主連線送出移動指令後會卡�
 - **R632**：KAREL
 - **R648**：User Socket Messaging
 
-查法：`菜单` → `下页` → `状态` → `版本识别` → 按 `ORDER FI`。
+查法：`菜單` → `下頁` → `狀態` → `版本識別` → 按 `ORDER FI`。
 
-比較快的判斷方式：`一览` → `类型` 裡面有沒有 `KAREL程序` 這一項，
+比較快的判斷方式：`一覽` → `類型` 裡面有沒有 `KAREL程序` 這一項，
 有就代表 R632 已經裝了。
 
-兩個選項都沒裝的話，要在 ROBOGUIDE 對這台機器人做 Serialize / robot
+兩個選項都沒裝的話，要在 ROBOGUIDE 對這臺機器人做 Serialize / robot
 options 更新，進 virtual robot edit wizard 把兩個選項加進去。這步
 沒辦法繞過，選項沒裝，後面所有步驟都做不了。
 

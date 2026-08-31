@@ -26,15 +26,15 @@ fanuc status
 | 症狀 | 原因 |
 | --- | --- |
 | `WinError 10061` | port 沒 LISTENING。ROBOGUIDE 沒開、MAPPDK 沒跑，或 tag 編號跟 driver 對不上，見[伺服器 tag 設定](server-tags.md) |
-| `PROG-048 运行时放开了[Shift]键` | 在 T1/T2 模式跑，改 AUTO |
-| `INTP-106 不能开始执行` | 程式停在 `已暂停` 而且有沒清的錯誤，先 `中止程序` 再 `RESET` |
-| `MCTL-003 系统处于错误状态` | 按 `RESET`，還在就檢查急停跟 fault |
+| `PROG-048 運行時放開了[Shift]鍵` | 在 T1/T2 模式跑，改 AUTO |
+| `INTP-106 不能開始執行` | 程式停在 `已暫停` 而且有沒清的錯誤，先 `中止程序` 再 `RESET` |
+| `MCTL-003 系統處於錯誤狀態` | 按 `RESET`，還在就檢查急停跟 fault |
 | TP 顯示 started 但 port 沒開 | tag 編號跟 driver 原始碼裡的 `SERVER_TAG_NUM` 不符 |
 | 18735 通、18736 不通 | S7 沒設或沒啟動，或 `MAPPDK` 程式裡第 2 行 `RUN MAPPDK_LOGGER` 被刪了 |
-| `类型` 裡沒有 `KAREL程序` | R632 選項沒裝，見[開始之前](prerequisites.md) |
+| `類型` 裡沒有 `KAREL程序` | R632 選項沒裝，見[開始之前](prerequisites.md) |
 | `fanuc status` 顯示上游版本（不是 `fanuc-driver x.x.x`） | 載入的是舊版或上游 `.pc`，重新載入 `driver/upload/` 裡的檔案 |
 
-程式卡住、Python 端一直沒回應：`辅助` → `中止程序`，再照
+程式卡住、Python 端一直沒回應：`輔助` → `中止程序`，再照
 [執行](running.md)重跑一次 MAPPDK。
 
 ---

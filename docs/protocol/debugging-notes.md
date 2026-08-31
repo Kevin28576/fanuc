@@ -23,7 +23,7 @@ hasn't found an equivalent access method yet, not ruling out that it's
 just not found rather than confirmed impossible. **This approach has
 since been removed**; anyone continuing to try, this is the known
 sticking point. For full alarm history, go directly to the TP's
-`报警` → `履历` screen for now.
+`報警` → `履歷` screen for now.
 
 ### `ERR_DATA` rewrites the parameter passed in
 

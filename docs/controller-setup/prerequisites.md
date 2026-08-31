@@ -4,9 +4,22 @@ One-time setup for the ROBOGUIDE virtual controller. The setup lives
 in the workcell, so after this only MAPPDK needs starting on each
 boot, no need to redo any of this.
 
-The TP menus are labeled in Simplified Chinese; wording varies a bit
-by version (e.g. `装载` vs `加载`). System variable names are always
-in English, never translated.
+The TP's menu language follows whatever the controller is set to.
+This document assumes English menus; the Traditional Chinese version
+of this document ([開始之前](../zh/controller-setup/prerequisites.md))
+assumes Traditional Chinese menus instead, matching that TP's actual
+setting.
+
+> [!NOTE]
+> The English menu labels quoted throughout this document are filled
+> in from general knowledge of FANUC's standard TP interface, not
+> checked against a real English-mode TP screen. Wording (and in a
+> few places, the exact menu path) may not match yours exactly; if
+> something doesn't line up, the labels are the part to distrust
+> first.
+
+System variable names are always in English, never translated,
+regardless of the TP's menu language.
 
 ## The controller runs two servers
 
@@ -33,10 +46,10 @@ Need both of these:
 - **R632**: KAREL
 - **R648**: User Socket Messaging
 
-How to check: `菜单` → `下页` → `状态` → `版本识别` → press `ORDER FI`.
+How to check: `MENU` → `NEXT` → `STATUS` → `Version ID` → press `ORDER FI`.
 
-Faster check: whether `一览` → `类型` has a `KAREL程序` entry; if so,
-R632 is installed.
+Faster check: whether `SELECT` → `Type` has a `KAREL Programs` entry;
+if so, R632 is installed.
 
 If either option is missing, do a Serialize / robot options update on
 this robot in ROBOGUIDE, and add both options in the virtual robot

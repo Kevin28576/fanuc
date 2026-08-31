@@ -36,7 +36,7 @@ RDO 編號原本也只取 1 個字元，編號 10 以上會被截成第一位數
 **存取控制器沒有的 RDO 會讓整支 MAPPDK_SERVER 中止。** TP 上會看到
 
 ```
-PRIO-002 端口号不正确
+PRIO-002 端口號不正確
 ```
 
 要按 RESET 再重跑 MAPPDK 才能恢復。KAREL 那邊擋不掉，`GET_PORT_VAL`

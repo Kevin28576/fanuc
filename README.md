@@ -66,6 +66,21 @@ This repository has two parts:
 > `host` at a real controller. That way a mistake in your own logic
 > doesn't play out unexpectedly on real hardware.
 
+> [!CAUTION]
+> MAPPDK's wire protocol has no authentication and no encryption —
+> plain text over a plain TCP socket. Anyone who can reach the
+> controller's port (18735, and 18736 if S7 is set up) can send it
+> motion commands, register writes, and system-variable writes, no
+> login required. This is inherent to FANUC's MAPPDK driver design,
+> not something this package or the KAREL driver in `driver/` adds or
+> can fix in software. **Never expose these ports to an untrusted
+> network.** Keep the controller on an isolated, machine-only network
+> with no path to the open internet or a general office/production
+> LAN — reachability to that network is equivalent to physical access
+> to the robot. Moving off the default ports doesn't add
+> authentication, but it's straightforward and worth doing anyway; see
+> [docs/controller-setup/server-tags.md](docs/controller-setup/server-tags.md#using-a-non-default-port).
+
 ## Contents
 
 - [Test environment](#test-environment)

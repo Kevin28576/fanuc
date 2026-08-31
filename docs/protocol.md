@@ -20,5 +20,11 @@ source in `driver/`. Split into the following, by topic:
 For the controller-side environment setup (ROBOGUIDE, TP operation),
 see [Controller setup](controller-setup.md).
 
+> [!CAUTION]
+> Everything below is a plain-text protocol over a plain TCP socket,
+> with no authentication and no encryption at any layer. Never expose
+> ports 18735/18736 to a network you don't fully trust; see the
+> project README's security note.
+
 ---
 *Last updated: 2026-08-31*

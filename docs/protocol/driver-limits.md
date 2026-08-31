@@ -43,7 +43,7 @@ upstream driver, the Python side applies the old limit itself.
 MAPPDK_SERVER.** The TP shows:
 
 ```
-PRIO-002 端口号不正确
+PRIO-002 端口號不正確
 ```
 
 Recovering needs RESET and rerunning MAPPDK. KAREL itself can't guard
