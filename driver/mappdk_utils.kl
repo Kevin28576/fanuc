@@ -1,0 +1,29 @@
+----------------------------------------------------
+-- Author:              TAI TZU-HENG (戴梓恆)
+-- Email:               0918150353yuiop@gmail.com
+-- Homepage:            https://kevin.com.tw/
+-- Copyright:           Copyright 2026 TAI TZU-HENG (戴梓恆)
+-- License:             Apache License 2.0
+--
+-- Origin:              fanucpy MAPPDK driver
+--                      Copyright Agajan Torayev
+--                      https://github.com/torayeff/fanucpy
+--                      Apache License 2.0
+--                      Change summary in NOTICE at the project root.
+--
+-- Purpose:             Shared KAREL routines.
+----------------------------------------------------
+
+
+ROUTINE TP_CLS
+----------------------------------------------------
+-- Clears the teach pendant screen.
+----------------------------------------------------
+-- Parameters: none.
+----------------------------------------------------
+-- Returns: nothing.
+----------------------------------------------------
+BEGIN
+    WRITE(CHR(128), CHR(137))
+    FORCE_SPMENU(TP_PANEL, SPI_TPUSER, 1)
+END TP_CLS

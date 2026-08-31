@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 380" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#555"/>
+    </marker>
+  </defs>
+
+  <rect width="920" height="380" fill="#ffffff"/>
+
+  <!-- Python package -->
+  <rect x="20" y="150" width="150" height="80" rx="8" fill="#e8f0fe" stroke="#4285f4" stroke-width="1.5"/>
+  <text x="95" y="182" text-anchor="middle" font-size="14" font-weight="600" fill="#1a1a1a">Python</text>
+  <text x="95" y="202" text-anchor="middle" font-size="12" fill="#333">fanuc package</text>
+
+  <!-- MAPPDK_SERVER -->
+  <rect x="300" y="40" width="190" height="80" rx="8" fill="#fef7e0" stroke="#f9ab00" stroke-width="1.5"/>
+  <text x="395" y="70" text-anchor="middle" font-size="13" font-weight="600" fill="#1a1a1a">MAPPDK_SERVER</text>
+  <text x="395" y="88" text-anchor="middle" font-size="11" fill="#333">S8, TCP port 18735</text>
+  <text x="395" y="104" text-anchor="middle" font-size="11" fill="#333">motion, I/O, position</text>
+
+  <!-- MAPPDK_LOGGER -->
+  <rect x="300" y="260" width="190" height="80" rx="8" fill="#fef7e0" stroke="#f9ab00" stroke-width="1.5"/>
+  <text x="395" y="290" text-anchor="middle" font-size="13" font-weight="600" fill="#1a1a1a">MAPPDK_LOGGER</text>
+  <text x="395" y="308" text-anchor="middle" font-size="11" fill="#333">S7, TCP port 18736</text>
+  <text x="395" y="324" text-anchor="middle" font-size="11" fill="#333">position queries while moving</text>
+
+  <!-- KAREL driver -->
+  <rect x="580" y="150" width="190" height="80" rx="8" fill="#e6f4ea" stroke="#34a853" stroke-width="1.5"/>
+  <text x="675" y="178" text-anchor="middle" font-size="13" font-weight="600" fill="#1a1a1a">KAREL driver</text>
+  <text x="675" y="196" text-anchor="middle" font-size="11" fill="#333">mappdk_cmd.kl</text>
+  <text x="675" y="212" text-anchor="middle" font-size="11" fill="#333">mappdk_ext.kl</text>
+
+  <!-- Controller -->
+  <rect x="820" y="150" width="80" height="80" rx="8" fill="#fce8e6" stroke="#ea4335" stroke-width="1.5"/>
+  <text x="860" y="184" text-anchor="middle" font-size="12" font-weight="600" fill="#1a1a1a">FANUC</text>
+  <text x="860" y="202" text-anchor="middle" font-size="11" fill="#333">controller</text>
+  <text x="860" y="218" text-anchor="middle" font-size="11" fill="#333">&amp; robot</text>
+
+  <!-- curves: python -> server (upper), python -> logger (lower), well separated -->
+  <path d="M170,168 C235,150 260,105 298,93" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M170,212 C235,230 260,275 298,287" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- labels, offset clear of the curves and of each other, on a white backing so the stroke never crosses the text -->
+  <g transform="translate(205,114)">
+    <rect x="-32" y="-9" width="64" height="16" fill="#ffffff"/>
+    <text text-anchor="middle" font-size="10" fill="#555">TCP :18735</text>
+  </g>
+  <g transform="translate(205,266)">
+    <rect x="-32" y="-9" width="64" height="16" fill="#ffffff"/>
+    <text text-anchor="middle" font-size="10" fill="#555">TCP :18736</text>
+  </g>
+
+  <!-- server -> driver -->
+  <path d="M490,100 C540,100 555,150 578,168" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <!-- logger -> driver -->
+  <path d="M490,280 C540,280 555,230 578,212" fill="none" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- driver -> controller -->
+  <line x1="770" y1="190" x2="818" y2="190" stroke="#555" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <text x="460" y="360" text-anchor="middle" font-size="11" fill="#666">Two independent connections; the driver's command set is identical on both.</text>
+</svg>

@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Test / type-check caches
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Build output
+build/
+dist/
+
+# Editor
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Local env / secrets, never commit these
+.env
+.env.*
+
+# Files examples/ writes into the repo root when run from there
+# (examples/record_waypoints.py, examples/move_sequence.py,
+# examples/trace_motion.py); regenerate them, don't commit them.
+/waypoints.json
+/trace.csv
+
+# Experimental AI-control examples, not published yet.
+/examples/ai_chat/
+/examples/ai_voice/
+/examples/ai_vision/

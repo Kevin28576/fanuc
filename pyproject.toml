@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fanuc"
+version = "1.0.0"
+description = "A toolkit for talking to a FANUC robot from Python (MAPPDK protocol)"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Apache-2.0" }
+authors = [
+    { name = "戴梓恆 (TAI TZU-HENG)", email = "0918150353yuiop@gmail.com" },
+]
+keywords = ["fanuc", "robot", "roboguide", "karel", "mappdk", "industrial"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Manufacturing",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Hardware",
+    "Typing :: Typed",
+]
+
+# No runtime dependencies: the protocol and transport layers only use
+# the standard library's socket. Upstream fanucpy pulls in numpy/scipy
+# for calibration and transformations; this package doesn't use those,
+# so it doesn't inherit their dependencies or version caps either.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Kevin28576/fanuc"
+Repository = "https://github.com/Kevin28576/fanuc"
+Issues = "https://github.com/Kevin28576/fanuc/issues"
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+# Shell TAB completion for the CLI, optional. Only actually activates
+# in cli.py when installed; leaving it out doesn't affect anything
+# else the package does.
+complete = ["argcomplete>=3"]
+
+[project.scripts]
+fanuc = "fanuc.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+# py.typed is the PEP 561 marker file; setuptools only packages .py
+# files by default, so non-code files need an explicit declaration to
+# actually get installed. Without it, IDEs treat this package as
+# having no type information, and Tab completion has to guess the
+# structure instead of using the type hints in the source.
+fanuc = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[[tool.mypy.overrides]]
+# argcomplete is an optional dependency (see [complete] above) and
+# ships no type stubs; this keeps `import argcomplete` from failing
+# mypy --strict even when it isn't installed in the current environment.
+module = "argcomplete"
+ignore_missing_imports = true

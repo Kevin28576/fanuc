@@ -1,0 +1,61 @@
+fanuc
+Copyright 2026 TAI TZU-HENG (戴梓恆)
+0918150353yuiop@gmail.com
+https://kevin.com.tw/
+
+This project's KAREL driver (driver/ directory) is derived from the
+fanucpy project's MAPPDK driver:
+
+    fanucpy (Python package for FANUC industrial robots)
+    Copyright Agajan Torayev
+    https://github.com/torayeff/fanucpy
+    Licensed under the Apache License, Version 2.0
+
+Within driver/, the SET_SYS_VAR routine's original author is Michael
+Yiu (MKS Instruments); that copyright notice is kept in
+driver/mappdk_cmd.kl.
+
+Per Apache License 2.0 Section 4, the following is a summary of
+modifications made to the original files:
+
+  driver/mappdk_cmd.kl
+    - GET_RDO / SET_RDO: originally read a single character with
+      SUB_STR(cmd, 8, 1), so RDO numbers 10 and above got truncated to
+      their first digit and silently operated on the wrong RDO.
+      Changed to read to the end of the string (GET_RDO) and locate
+      the delimiter (SET_RDO), so numbers of any digit count work.
+    - HANDLE_CMD: added dispatch for 15 extension commands,
+      implemented in mappdk_ext.kl.
+
+  driver/mappdk_server.kl
+  driver/mappdk_logger.kl
+    - Added %ENVIRONMENT declarations (SYSDEF, BYNAM, MOTN, STRNG,
+      REGOPE, ERRS, FLBT), needed by the built-in functions the
+      extension routines use.
+    - Added %INCLUDE mappdk_ext.
+
+  driver/upload/mappdk.ls
+  driver/upload/mappdk_move.ls
+  driver/upload/mappdk_movel.ls
+  driver/mappdk_comm.kl
+  driver/mappdk_utils.kl
+    - Unmodified, carried over as-is from upstream.
+
+  driver/upload/*.pc
+    - Compiled output of the .kl files above, built with FANUC ktrans.
+
+Files added by this project, not present upstream:
+
+  driver/mappdk_ext.kl
+    - Extension routines: ver, getreg, setreg, getpreg, setpreg,
+      getdin, getsysvar, getalarm, chkjnt, chkpos, setsysvarnum,
+      getsreg, setsreg, getjpreg, setjpreg.
+
+Upstream files not carried over:
+  - the upstream Python package's source, examples, and documentation
+
+This project's Python code (src/, examples/, tests/) is an independent
+implementation; it doesn't copy any upstream code, only reuses its
+public method names to stay call-compatible.
+
+The full text of the Apache License 2.0 is in the LICENSE file.

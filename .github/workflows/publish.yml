@@ -1,0 +1,60 @@
+name: Publish to PyPI
+
+# Trusted publishing via OIDC: no PyPI token/secret is stored anywhere.
+# PyPI's "pending publisher" for this project is configured with:
+#   owner=Kevin28576, repository=fanuc, workflow=publish.yml, environment=pypi
+#
+# Triggers on a GitHub Release being published. To ship a new version:
+#   1. bump version in pyproject.toml and src/fanuc/__init__.py
+#   2. git tag vX.Y.Z && git push --tags
+#   3. create a GitHub Release from that tag (or use workflow_dispatch below
+#      to test the build/test job without actually publishing)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -e ".[dev]" mypy
+      - run: pytest
+      - run: mypy --strict src/fanuc
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install build
+      - run: python -m build
+      - run: pip install twine && twine check dist/*
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    # Only actually publishes on a real release, never on a manual
+    # workflow_dispatch test run.
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write  # required for OIDC trusted publishing
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1

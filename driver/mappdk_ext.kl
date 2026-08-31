@@ -1,0 +1,718 @@
+----------------------------------------------------
+-- Author:              TAI TZU-HENG (戴梓恆)
+-- Email:               0918150353yuiop@gmail.com
+-- Homepage:            https://kevin.com.tw/
+-- Copyright:           Copyright 2026 TAI TZU-HENG (戴梓恆)
+-- License:             Apache License 2.0
+--
+-- Purpose:             fanuc-driver extension routines.
+--                      New in this project; contains no upstream
+--                      fanucpy code. Command format follows its
+--                      conventions for consistency.
+--
+-- Required environments (declared in mappdk_server.kl /
+-- mappdk_logger.kl):
+--      REGOPE  : GET_REG / SET_INT_REG / SET_REAL_REG / GET_POS_REG / SET_POS_REG
+--      ERRS    : ERR_DATA
+--
+-- Command format: number zero-padded to 5 digits, response is
+-- '<code>:<message>'.
+----------------------------------------------------
+
+
+ROUTINE VER_INFO(cmd: STRING): STRING
+----------------------------------------------------
+-- Reports the driver version so the client can tell which commands
+-- are available.
+-- cmd: 'ver'
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+BEGIN
+    resp = '0:fanuc-driver 0.2.0'
+    RETURN(resp)
+END VER_INFO
+
+
+ROUTINE GET_NUMREG(cmd: STRING): STRING
+----------------------------------------------------
+-- Reads numeric register R[n].
+-- cmd: 'getreg:nnnnn'  n is zero-padded to 5 digits
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    out:                STRING[254]
+    reg_num:            INTEGER
+    int_val:            INTEGER
+    real_val:           REAL
+    real_flag:          BOOLEAN
+    status:             INTEGER
+BEGIN
+    CNV_STR_INT(SUB_STR(cmd, 8, 5), reg_num)
+
+    GET_REG(reg_num, real_flag, int_val, real_val, status)
+    IF status <> 0 THEN
+        resp = '1:cannot-get-reg'
+        RETURN(resp)
+    ENDIF
+
+    IF real_flag THEN
+        CNV_REAL_STR(real_val, 1, 6, out)
+    ELSE
+        CNV_INT_STR(int_val, 1, 0, out)
+    ENDIF
+
+    resp = '0:' + out
+    RETURN(resp)
+END GET_NUMREG
+
+
+ROUTINE SET_NUMREG(cmd: STRING): STRING
+----------------------------------------------------
+-- Writes numeric register R[n].
+-- cmd: 'setreg:nnnnn:value'
+-- Writes to the real register if the value has a decimal point,
+-- otherwise the integer register.
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    val_str:            STRING[254]
+    reg_num:            INTEGER
+    int_val:            INTEGER
+    real_val:           REAL
+    status:             INTEGER
+BEGIN
+    CNV_STR_INT(SUB_STR(cmd, 8, 5), reg_num)
+
+    -- 'setreg:' is 7 chars + 5-digit number + ':' -> value starts at char 14
+    val_str = SUB_STR(cmd, 14, STR_LEN(cmd) - 13)
+
+    IF INDEX(val_str, '.') > 0 THEN
+        CNV_STR_REAL(val_str, real_val)
+        SET_REAL_REG(reg_num, real_val, status)
+    ELSE
+        CNV_STR_INT(val_str, int_val)
+        SET_INT_REG(reg_num, int_val, status)
+    ENDIF
+
+    IF status <> 0 THEN
+        resp = '1:cannot-set-reg'
+        RETURN(resp)
+    ENDIF
+
+    resp = '0:success'
+    RETURN(resp)
+END SET_NUMREG
+
+
+ROUTINE GET_POSREG(cmd: STRING): STRING
+----------------------------------------------------
+-- Reads position register PR[n], same format as curpos.
+-- cmd: 'getpreg:nnnnn'
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    out:                STRING[254]
+    reg_num:            INTEGER
+    status:             INTEGER
+    ppos:               XYZWPR
+BEGIN
+    CNV_STR_INT(SUB_STR(cmd, 9, 5), reg_num)
+
+    ppos = GET_POS_REG(reg_num, status)
+    IF status <> 0 THEN
+        resp = '1:cannot-get-preg'
+        RETURN(resp)
+    ENDIF
+
+    CNV_REAL_STR(ppos.x, 8, 3, out)
+    resp = '0:x=' + out
+
+    CNV_REAL_STR(ppos.y, 8, 3, out)
+    resp = resp + ',y=' + out
+
+    CNV_REAL_STR(ppos.z, 8, 3, out)
+    resp = resp + ',z=' + out
+
+    CNV_REAL_STR(ppos.w, 8, 3, out)
+    resp = resp + ',w=' + out
+
+    CNV_REAL_STR(ppos.p, 8, 3, out)
+    resp = resp + ',p=' + out
+
+    CNV_REAL_STR(ppos.r, 8, 3, out)
+    resp = resp + ',r=' + out
+
+    RETURN(resp)
+END GET_POSREG
+
+
+ROUTINE SET_POSREG(cmd: STRING): STRING
+----------------------------------------------------
+-- Writes position register PR[n].
+-- cmd: 'setpreg:nnnnn:<v1>:<v2>:<v3>:<v4>:<v5>:<v6>'
+-- Each value is a sign + a 14-character fixed-point number, same
+-- format as movep.
+--
+-- The configuration is taken from the current position; only the six
+-- XYZWPR values are overwritten, to avoid writing an uninitialized
+-- config that would make later motions unsolvable.
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    reg_num:            INTEGER
+    status:             INTEGER
+    start:              INTEGER
+    val:                REAL
+    ppos:               XYZWPR
+BEGIN
+    CNV_STR_INT(SUB_STR(cmd, 9, 5), reg_num)
+
+    ppos = CURPOS(0, 0)
+
+    -- 'setpreg:' is 8 chars + 5-digit number + ':' -> first value starts
+    -- at char 15. Each value is 14 chars followed by a ':' separator,
+    -- so the stride is 15.
+    start = 15
+    CNV_STR_REAL(SUB_STR(cmd, start, 14), val)
+    ppos.x = val
+
+    start = start + 15
+    CNV_STR_REAL(SUB_STR(cmd, start, 14), val)
+    ppos.y = val
+
+    start = start + 15
+    CNV_STR_REAL(SUB_STR(cmd, start, 14), val)
+    ppos.z = val
+
+    start = start + 15
+    CNV_STR_REAL(SUB_STR(cmd, start, 14), val)
+    ppos.w = val
+
+    start = start + 15
+    CNV_STR_REAL(SUB_STR(cmd, start, 14), val)
+    ppos.p = val
+
+    start = start + 15
+    CNV_STR_REAL(SUB_STR(cmd, start, 14), val)
+    ppos.r = val
+
+    SET_POS_REG(reg_num, ppos, status)
+    IF status <> 0 THEN
+        resp = '1:cannot-set-preg'
+        RETURN(resp)
+    ENDIF
+
+    resp = '0:success'
+    RETURN(resp)
+END SET_POSREG
+
+
+ROUTINE GET_DIN_VAL(cmd: STRING): STRING
+----------------------------------------------------
+-- Reads digital input DI[n].
+-- cmd: 'getdin:nnnnn'
+-- Upstream can only read DO, not DI.
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    din_num:            INTEGER
+BEGIN
+    CNV_STR_INT(SUB_STR(cmd, 8, 5), din_num)
+
+    IF DIN[din_num] THEN
+        resp = '0:1'
+    ELSE
+        resp = '0:0'
+    ENDIF
+
+    RETURN(resp)
+END GET_DIN_VAL
+
+
+-- A SET_DIN_VAL (write/simulate DI[n]) was attempted here, assigning
+-- directly to DIN[n]. ktrans rejected it at compile time:
+--
+--     This system Id is "write protected" from KAREL user programs.
+--     Id: DIN
+--
+-- DIN is read-only to user programs at the KAREL language level,
+-- regardless of whether the TP's SIM mode is on for that point. This
+-- isn't a "high risk, try it carefully" situation; it's simply not
+-- possible, and the attempt has been dropped. Do not try this again.
+-- DI simulation can only be done through the teach pendant itself (if
+-- the controller model/version supports it).
+
+
+ROUTINE GET_SYSVAR_NUM(cmd: STRING): STRING
+----------------------------------------------------
+-- Reads a numeric system variable.
+-- cmd: 'getsysvar:<var_name>'
+--
+-- Upstream's setsysvar can only write booleans. With this routine,
+-- things like the override speed ($MCR.$GENOVERRIDE) and the
+-- UFRAME/UTOOL numbers can be read without a dedicated routine per
+-- variable.
+--
+-- Tries reading as an integer first, then as a real on failure.
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    out:                STRING[254]
+    var_name:           STRING[254]
+    entry:              INTEGER
+    status:             INTEGER
+    int_val:            INTEGER
+    real_val:           REAL
+BEGIN
+    -- 'getsysvar:' is 10 chars
+    var_name = SUB_STR(cmd, 11, STR_LEN(cmd) - 10)
+
+    GET_VAR(entry, '*SYSTEM*', var_name, int_val, status)
+    IF status = 0 THEN
+        CNV_INT_STR(int_val, 1, 0, out)
+        resp = '0:' + out
+        RETURN(resp)
+    ENDIF
+
+    GET_VAR(entry, '*SYSTEM*', var_name, real_val, status)
+    IF status = 0 THEN
+        CNV_REAL_STR(real_val, 1, 6, out)
+        resp = '0:' + out
+        RETURN(resp)
+    ENDIF
+
+    resp = '1:cannot-get-sysvar'
+    RETURN(resp)
+END GET_SYSVAR_NUM
+
+
+ROUTINE CHECK_JOINT(cmd: STRING): STRING
+----------------------------------------------------
+-- Checks whether a set of joint angles is within the controller's
+-- soft limits, without actually moving.
+-- cmd: 'chkjnt:N:<v1>:<v2>:...:<vN>'
+-- N: axis count, 1 digit; each value has the same format as movej
+-- (sign + a 14-character fixed-point number).
+--
+-- Uses J_IN_RANGE, a KAREL built-in, rather than a self-maintained
+-- limit table. Upside: it also accounts for mechanical-coupling
+-- limits like J2/J3, which is more accurate than a per-axis limit
+-- table. Downside: it can only answer "is this position legal", not
+-- what the actual limit values are.
+--
+-- jpos must be typed JOINTPOS6, not the generic JOINTPOS; otherwise
+-- CNV_REL_JPOS throws INTP-311 "parameter not yet set". The MOVEJ
+-- routine (mappdk_cmd.kl) also uses JOINTPOS6; this stays consistent
+-- with it.
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    nj:                 INTEGER
+    i:                  INTEGER
+    start:              INTEGER
+    jval:               REAL
+    joint_vals:         ARRAY[9] OF REAL
+    jpos:               JOINTPOS6
+    status:             INTEGER
+    in_range:           BOOLEAN
+CONST
+    n_chars = 14
+BEGIN
+    -- 'chkjnt:' is 7 chars, the axis count follows as 1 char
+    start = 8
+    CNV_STR_INT(SUB_STR(cmd, start, 1), nj)
+    start = start + 1 + 1
+
+    FOR i = 1 TO nj DO
+        CNV_STR_REAL(SUB_STR(cmd, start, n_chars), jval)
+        joint_vals[i] = jval
+        start = start + n_chars + 1
+    ENDFOR
+
+    CNV_REL_JPOS(joint_vals, jpos, status)
+    IF status <> 0 THEN
+        resp = '1:cannot-convert-joint-vals'
+        RETURN(resp)
+    ENDIF
+
+    in_range = J_IN_RANGE(jpos)
+    IF in_range THEN
+        resp = '0:1'
+    ELSE
+        resp = '0:0'
+    ENDIF
+    RETURN(resp)
+END CHECK_JOINT
+
+
+ROUTINE CHECK_POSE(cmd: STRING): STRING
+----------------------------------------------------
+-- Checks whether a Cartesian position is reachable, without actually
+-- moving.
+-- cmd: 'chkpos:<X>:<Y>:<Z>:<W>:<P>:<R>', each value in the same format
+-- as movep (sign + 14-character fixed-point number), always 6 values,
+-- external axes not supported.
+--
+-- Uses the same CHECK_EPOS as the MOVEP routine (mappdk_cmd.kl) for
+-- reachability. CHECK_EPOS is the same built-in already exercised by
+-- movep in production, not something new and untested. The difference
+-- is that this doesn't write PR[81] or call CALL_PROGLIN, so no
+-- motion is actually triggered.
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    pose:               XYZWPR
+    pval:               REAL
+    i:                  INTEGER
+    start:              INTEGER
+    status:             INTEGER
+CONST
+    n_chars = 14
+BEGIN
+    pose = CURPOS(0, 0)
+
+    -- 'chkpos:' is 7 chars, the first value follows
+    start = 8
+
+    FOR i = 1 TO 6 DO
+        CNV_STR_REAL(SUB_STR(cmd, start, n_chars), pval)
+
+        IF i = 1 THEN
+            pose.x = pval
+        ENDIF
+        IF i = 2 THEN
+            pose.y = pval
+        ENDIF
+        IF i = 3 THEN
+            pose.z = pval
+        ENDIF
+        IF i = 4 THEN
+            pose.w = pval
+        ENDIF
+        IF i = 5 THEN
+            pose.p = pval
+        ENDIF
+        IF i = 6 THEN
+            pose.r = pval
+        ENDIF
+
+        start = start + n_chars + 1
+    ENDFOR
+
+    CHECK_EPOS ((pose), $UFRAME, $UTOOL, status)
+    IF status <> 0 THEN
+        resp = '0:0'
+        RETURN(resp)
+    ENDIF
+
+    resp = '0:1'
+    RETURN(resp)
+END CHECK_POSE
+
+
+ROUTINE SET_SYSVAR_NUM(cmd: STRING): STRING
+----------------------------------------------------
+-- Writes a numeric system variable.
+-- cmd: 'setsysvarnum:<var_name>:<value>'
+--
+-- Upstream's setsysvar (SET_SYS_VAR in mappdk_cmd.kl) can only write
+-- booleans ('T'/'F'); this adds the numeric counterpart, pairing with
+-- getsysvar. Writes a real if the value has a decimal point, otherwise
+-- an integer, same rule as SET_NUMREG.
+--
+-- Verified on real hardware: writing back a system variable's own
+-- current value ($MCR.$GENOVERRIDE), reading it back matches,
+-- success.
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    var_name:           STRING[254]
+    val_str:            STRING[254]
+    sep_pos:             INTEGER
+    entry:              INTEGER
+    status:             INTEGER
+    int_val:            INTEGER
+    real_val:           REAL
+BEGIN
+    -- 'setsysvarnum:' is 13 chars
+    var_name = SUB_STR(cmd, 14, STR_LEN(cmd) - 13)
+
+    -- The variable name and value are separated by the *last* colon,
+    -- since the variable name itself can contain colons (e.g.
+    -- $PARAM_GROUP[1].$LOWERLIM), so search from the end for the
+    -- separator.
+    FOR sep_pos = STR_LEN(var_name) DOWNTO 1 DO
+        IF SUB_STR(var_name, sep_pos, 1) = ':' THEN
+            val_str = SUB_STR(var_name, sep_pos + 1, STR_LEN(var_name) - sep_pos)
+            var_name = SUB_STR(var_name, 1, sep_pos - 1)
+        ENDIF
+    ENDFOR
+
+    IF INDEX(val_str, '.') > 0 THEN
+        CNV_STR_REAL(val_str, real_val)
+        SET_VAR(entry, '*SYSTEM*', var_name, real_val, status)
+    ELSE
+        CNV_STR_INT(val_str, int_val)
+        SET_VAR(entry, '*SYSTEM*', var_name, int_val, status)
+    ENDIF
+
+    IF status <> 0 THEN
+        resp = '1:cannot-set-sysvar'
+        RETURN(resp)
+    ENDIF
+
+    resp = '0:success'
+    RETURN(resp)
+END SET_SYSVAR_NUM
+
+
+ROUTINE GET_STRREG(cmd: STRING): STRING
+----------------------------------------------------
+-- Reads string register SR[n].
+-- cmd: 'getsreg:nnnnn'
+--
+-- Verified on real hardware: round-trips correctly with a value
+-- written by SET_STRREG.
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    out:                STRING[254]
+    reg_num:            INTEGER
+    status:             INTEGER
+BEGIN
+    CNV_STR_INT(SUB_STR(cmd, 9, 5), reg_num)
+
+    GET_STR_REG(reg_num, out, status)
+    IF status <> 0 THEN
+        resp = '1:cannot-get-sreg'
+        RETURN(resp)
+    ENDIF
+
+    resp = '0:' + out
+    RETURN(resp)
+END GET_STRREG
+
+
+ROUTINE SET_STRREG(cmd: STRING): STRING
+----------------------------------------------------
+-- Writes string register SR[n].
+-- cmd: 'setsreg:nnnnn:<value>'
+-- value must not contain a colon, which would break the protocol
+-- framing; the Python side rejects that before sending.
+--
+-- Verified on real hardware: reading it back with GET_STRREG matches
+-- what was written.
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    val_str:            STRING[254]
+    reg_num:            INTEGER
+    status:             INTEGER
+BEGIN
+    CNV_STR_INT(SUB_STR(cmd, 9, 5), reg_num)
+
+    -- 'setsreg:' is 8 chars + 5-digit number + ':' -> value starts at char 15
+    val_str = SUB_STR(cmd, 15, STR_LEN(cmd) - 14)
+
+    SET_STR_REG(reg_num, val_str, status)
+    IF status <> 0 THEN
+        resp = '1:cannot-set-sreg'
+        RETURN(resp)
+    ENDIF
+
+    resp = '0:success'
+    RETURN(resp)
+END SET_STRREG
+
+
+ROUTINE GET_JPOSREG(cmd: STRING): STRING
+----------------------------------------------------
+-- Reads a joint-type position register.
+-- cmd: 'getjpreg:nnnnn'
+--
+-- getpreg (GET_POSREG) only returns Cartesian coordinates; if the
+-- register actually stores a joint position (shown as J1/J2/... on
+-- the TP), use this routine instead to get correct values.
+--
+-- Response format matches curjpos: 'j=...,j=...'.
+--
+-- The first version hung on real hardware (no response at all).
+-- Root cause, found by comparing against the already-verified
+-- GET_CURJPOS in mappdk_cmd.kl: that routine calls
+-- CNV_JPOS_REL(jpos, joint_vals, status) with the generic JOINTPOS
+-- type; the third parameter is a status code, not an axis count!
+-- The original version here declared JOINTPOS6 and treated that third
+-- parameter as an axis count (even naming it nj); both wrong: wrong
+-- type, and the loop bound was driven by a variable that was never
+-- correctly assigned. Rewritten to match GET_CURJPOS exactly: JOINTPOS
+-- (not JOINTPOS6), the third parameter as a status code, and UNINIT()
+-- to tell which array slots are real axes (mechanisms have different
+-- axis counts, so unused slots stay unset).
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    out:                STRING[254]
+    reg_num:            INTEGER
+    status:             INTEGER
+    jpos:               JOINTPOS
+    joint_vals:         ARRAY[9] OF REAL
+    i:                  INTEGER
+BEGIN
+    CNV_STR_INT(SUB_STR(cmd, 10, 5), reg_num)
+
+    jpos = GET_JPOS_REG(reg_num, status)
+    IF status <> 0 THEN
+        resp = '1:cannot-get-jpreg'
+        RETURN(resp)
+    ENDIF
+
+    CNV_JPOS_REL(jpos, joint_vals, status)
+    IF status <> 0 THEN
+        resp = '1:cannot-convert-joint-vals'
+        RETURN(resp)
+    ENDIF
+
+    resp = '0:'
+    FOR i = 1 TO ARRAY_LEN(joint_vals) DO
+        IF UNINIT(joint_vals[i]) THEN
+            out = 'none'
+        ELSE
+            CNV_REAL_STR(joint_vals[i], 8, 3, out)
+        ENDIF
+        IF i > 1 THEN
+            resp = resp + ','
+        ENDIF
+        resp = resp + 'j=' + out
+    ENDFOR
+
+    RETURN(resp)
+END GET_JPOSREG
+
+
+ROUTINE SET_JPOSREG(cmd: STRING): STRING
+----------------------------------------------------
+-- Writes a joint-type position register.
+-- cmd: 'setjpreg:nnnnn:N:<v1>:...:<vN>'
+-- N: axis count, 1 digit; each value has the same format as movej
+-- (sign + a 14-character fixed-point number).
+--
+-- This routine's conversion direction (real array -> JOINTPOS6) is
+-- the same already-verified CNV_REL_JPOS pattern used by MOVEJ and
+-- CHECK_JOINT in mappdk_cmd.kl, same type (JOINTPOS6), same
+-- parameter order. Real-hardware testing also confirmed the
+-- SET_JPOS_REG call itself is fine (see docs/protocol.md). The actual
+-- problem was in the opposite direction, GET_JPOSREG (JOINTPOS ->
+-- real array), which has been fixed.
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    reg_num:            INTEGER
+    nj:                 INTEGER
+    i:                  INTEGER
+    start:              INTEGER
+    jval:               REAL
+    joint_vals:         ARRAY[9] OF REAL
+    jpos:               JOINTPOS6
+    status:             INTEGER
+CONST
+    n_chars = 14
+BEGIN
+    CNV_STR_INT(SUB_STR(cmd, 10, 5), reg_num)
+
+    -- 'setjpreg:' is 9 chars + 5-digit number + ':' -> axis count
+    -- starts at char 16
+    start = 16
+    CNV_STR_INT(SUB_STR(cmd, start, 1), nj)
+    start = start + 1 + 1
+
+    FOR i = 1 TO nj DO
+        CNV_STR_REAL(SUB_STR(cmd, start, n_chars), jval)
+        joint_vals[i] = jval
+        start = start + n_chars + 1
+    ENDFOR
+
+    CNV_REL_JPOS(joint_vals, jpos, status)
+    IF status <> 0 THEN
+        resp = '1:cannot-convert-joint-vals'
+        RETURN(resp)
+    ENDIF
+
+    SET_JPOS_REG(reg_num, jpos, status)
+    IF status <> 0 THEN
+        resp = '1:cannot-set-jpreg'
+        RETURN(resp)
+    ENDIF
+
+    resp = '0:success'
+    RETURN(resp)
+END SET_JPOSREG
+
+
+ROUTINE GET_ALARM(cmd: STRING): STRING
+----------------------------------------------------
+-- Reads the most recent alarm.
+-- cmd: 'getalarm'
+--
+-- Response format:
+-- 'id=<code>,sev=<severity>,cause=<cause_code>,time=<time>,prog=<prog_name>,msg=<message>'
+-- id/sev/cause/time are plain integers, prog_name is a short program
+-- name (STRING[16], no commas expected). The message may contain
+-- commas, so it's placed last; the client splits on the first five
+-- commas only, keeping the rest as the message.
+--
+-- time's exact meaning (what epoch/units ERR_DATA's TIME output uses)
+-- hasn't been verified against real documentation; treat it as an
+-- opaque integer for now, not something to do date arithmetic on
+-- without checking it against a known alarm's actual timestamp first.
+--
+-- There used to be a 'getalarmhist' command here and a 'getalarm:nnn'
+-- variant of this one, meant to read older entries by passing a
+-- sequence number into ERR_DATA's first parameter. Both were removed
+-- after live testing: parsing the sequence number was verified correct
+-- (echoed back 1, 2, 5, 8, 9 exactly as sent), but ERR_DATA returned
+-- the identical entry regardless of what was passed in. So this
+-- driver hasn't found a way to make ERR_DATA's first parameter select
+-- a historical entry; it may just be the wrong usage, not
+-- necessarily impossible. The TP's alarm history screen clearly has
+-- access to many distinct entries, so it uses some mechanism this
+-- driver hasn't found yet. If you pick this back up, this is the spot
+-- that's known to hit a wall; see docs/protocol.md for the full
+-- account before retrying the same approach.
+----------------------------------------------------
+VAR
+    resp:               STRING[254]
+    out:                STRING[254]
+    seq_num:            INTEGER
+    err_code:           INTEGER
+    err_str:            STRING[128]
+    cause_code:         INTEGER
+    cause_str:          STRING[128]
+    time_int:           INTEGER
+    severity:           INTEGER
+    prog_nam:           STRING[16]
+BEGIN
+    -- ERR_DATA(SEQ_NUM, ERROR_CODE, ERROR_STRING, CAUSE_CODE,
+    --          CAUSE_STRING, TIME, SEVERITY, PROG_NAM)
+    seq_num = 1
+    ERR_DATA(seq_num, err_code, err_str, cause_code, cause_str,
+             time_int, severity, prog_nam)
+
+    CNV_INT_STR(err_code, 1, 0, out)
+    resp = '0:id=' + out
+
+    CNV_INT_STR(severity, 1, 0, out)
+    resp = resp + ',sev=' + out
+
+    CNV_INT_STR(cause_code, 1, 0, out)
+    resp = resp + ',cause=' + out
+
+    CNV_INT_STR(time_int, 1, 0, out)
+    resp = resp + ',time=' + out
+
+    resp = resp + ',prog=' + prog_nam
+
+    resp = resp + ',msg=' + err_str
+
+    RETURN(resp)
+END GET_ALARM

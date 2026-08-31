@@ -1,0 +1,32 @@
+# Safety net: normalize line endings for anything not matched below,
+# letting Git decide text vs binary on its own.
+* text=auto
+
+# KAREL compiled output is binary; never touch its line endings.
+*.pc binary
+
+# KAREL / TP source and project docs/config stay LF, regardless of
+# what line ending the editor on a given machine defaults to.
+*.kl text eol=lf
+*.ls text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.toml text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf
+*.json text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
+*.svg text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+
+# Compiled driver output and third-party-derived source: exclude from
+# GitHub's language stats and diff views, they're not something anyone
+# reviews line by line.
+driver/upload/*.pc linguist-generated=true
+driver/mappdk_comm.kl linguist-vendored=true
+driver/mappdk_utils.kl linguist-vendored=true
+driver/upload/mappdk.ls linguist-vendored=true
+driver/upload/mappdk_move.ls linguist-vendored=true
+driver/upload/mappdk_movel.ls linguist-vendored=true
