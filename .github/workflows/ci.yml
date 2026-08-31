@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: pip install -e ".[dev]" mypy
+      - run: pip install -e ".[dev,complete]" mypy
       - run: pytest --cov=fanuc --cov-branch --cov-report=term-missing --cov-report=xml
       - run: mypy --strict src/fanuc
       - uses: codecov/codecov-action@v5

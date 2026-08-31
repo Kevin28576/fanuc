@@ -47,7 +47,13 @@ this project follows [Semantic Versioning](https://semver.org/).
   `argcomplete`-not-installed branch is tested by forcing the import
   to fail with `sys.modules["argcomplete"] = None` and reloading the
   module. Brought the project total from 94% to 100% line and branch
-  coverage.
+  coverage locally.
+- CI now installs the `complete` extra (`pip install -e ".[dev,complete]"`)
+  so `argcomplete` is actually present there too. Without it, CI's
+  environment never exercised `cli.py`'s "argcomplete is installed"
+  branch the way local runs did, so Codecov reported 98.91% for
+  `cli.py` even though local coverage said 100%; installing the extra
+  in CI closes that gap for real instead of just locally.
 
 ### Fixed
 
