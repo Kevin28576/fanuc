@@ -817,6 +817,16 @@ def test_parse_duration_rejects_bare_number():
 # logic itself.
 
 def test_motion_tracer_collects_samples(monkeypatch):
+    """Uses an unbounded counter for the fake positions, not a fixed-
+    length list: a finite iterator here is a real trap, since if the
+    background thread polls faster than the test expects and runs it
+    dry, next() raises StopIteration *inside the polling thread*,
+    which used to escape uncaught and crash the thread with a stray
+    traceback printed straight to stderr instead of failing the test
+    cleanly (see test_motion_tracer_survives_unexpected_exception,
+    which pins down that this is now handled)."""
+    from itertools import count
+
     from fanuc import MotionTracer
     from fanuc.types import Pose
 
@@ -824,7 +834,7 @@ def test_motion_tracer_collects_samples(monkeypatch):
     monkeypatch.setattr(tracer._robot, "connect", lambda: None)
     monkeypatch.setattr(tracer._robot, "disconnect", lambda: None)
 
-    positions = iter([10.0, 20.0, 30.0, 40.0, 50.0])
+    positions = count(10.0, 10.0)
     monkeypatch.setattr(
         tracer._robot, "get_curpos",
         lambda: Pose(x=next(positions), y=0, z=0, w=0, p=0, r=0),
@@ -858,6 +868,33 @@ def test_motion_tracer_requires_connect_before_start(monkeypatch):
     time.sleep(0.02)
     with pytest.raises(ConnectionError_):
         tracer.stop()
+
+
+def test_motion_tracer_survives_unexpected_exception(monkeypatch, capsys):
+    """The polling thread's except clause has to catch more than just
+    FanucError. A bug in the query path (or, as happened in practice,
+    a test double that runs dry mid-poll) must come back through
+    stop() like any other failure, not crash the background thread
+    with an uncaught traceback that threading prints straight to
+    stderr with no way for the caller to notice."""
+    from fanuc import MotionTracer
+
+    tracer = MotionTracer(interval="1ms")
+
+    def _boom():
+        raise StopIteration("simulating an exhausted test double, or any non-FanucError bug")
+
+    monkeypatch.setattr(tracer._robot, "get_curpos", _boom)
+
+    tracer.start()
+    time.sleep(0.02)
+    with pytest.raises(StopIteration):
+        tracer.stop()
+
+    # and nothing was printed straight to stderr by the threading
+    # module along the way -- the exception was actually caught, not
+    # left to crash the thread.
+    assert "Exception in thread" not in capsys.readouterr().err
 
 
 def test_motion_tracer_stop_without_start_returns_empty():

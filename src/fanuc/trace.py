@@ -36,7 +36,7 @@ from types import TracebackType
 from typing import Type
 
 from ._i18n import bi
-from .exceptions import ConnectionError_, FanucError
+from .exceptions import ConnectionError_
 from .protocol import LOGGER_PORT
 from .robot import FanucRobot, _parse_duration
 from .types import Pose
@@ -87,11 +87,12 @@ class MotionTracer:
         self._stop_event = threading.Event()
         self._samples: list[TraceSample] = []
         self._start_time: float | None = None
-        #: Exception recorded when the background thread's query fails;
-        #: stop() re-raises it. Not raised directly in the background
-        #: thread, since the main thread would never see it there --
-        #: recording would just quietly stop early with no clue why.
-        self._error: FanucError | None = None
+        #: Exception recorded when the background thread's query fails
+        #: (any exception, not just FanucError); stop() re-raises it.
+        #: Not raised directly in the background thread, since the
+        #: main thread would never see it there -- recording would
+        #: just quietly stop early with no clue why.
+        self._error: Exception | None = None
 
     def connect(self) -> None:
         """Connects to the logger/S7 port.
@@ -143,10 +144,14 @@ class MotionTracer:
         while not self._stop_event.is_set():
             try:
                 pose = self._robot.get_curpos()
-            except FanucError as exc:
-                # Stop recording on a connection problem. Not raised
-                # here in the background thread; stored instead so
-                # stop() can re-raise it.
+            except Exception as exc:
+                # Catches any exception, not just FanucError: a bug
+                # anywhere along this path (this thread's only job)
+                # must not vanish as a silently-swallowed traceback
+                # printed by the threading module with no way for the
+                # caller to know recording died partway through. Not
+                # raised here in the background thread; stored instead
+                # so stop() can re-raise it.
                 logger.warning(bi("軌跡記錄查詢失敗，提前停止", "trace query failed, stopping early") + "：%s", exc)
                 self._error = exc
                 return
