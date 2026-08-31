@@ -6,6 +6,16 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-08-31
+
+### Changed
+
+- READMEs now tell end users to `pip install fanuc` (and
+  `pip install "fanuc[complete]"` for shell TAB completion), not
+  `pip install -e .`, now that the package is actually on PyPI. The
+  editable/dev install is kept as a separate note for contributors
+  working from a repo clone.
+
 ## [1.1.1] - 2026-08-31
 
 ### Added
@@ -131,7 +141,8 @@ release. Kept here for the record of what that snapshot looked like.
 - `py.typed` marker; the whole `src/fanuc/` package passes
   `mypy --strict`.
 
-[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.1...HEAD
+[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.2...HEAD
+[1.1.2]: https://github.com/Kevin28576/fanuc/compare/v1.1.1...v1.1.2
 [1.1.1]: https://github.com/Kevin28576/fanuc/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/Kevin28576/fanuc/releases/tag/v1.1.0
 [1.0.0]: https://github.com/Kevin28576/fanuc/compare/7351db2...545003e
