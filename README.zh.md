@@ -128,6 +128,7 @@ with FanucRobot(host="127.0.0.1") as robot:
 | [robot_app.py](examples/robot_app.py) | `RobotApp` 任務框架的生命週期 |
 | [record_waypoints.py](examples/record_waypoints.py) | 手動移動、按 Enter 錄製點位 |
 | [move_sequence.py](examples/move_sequence.py) | 讀點位 JSON，依序執行（含執行前檢查） |
+| [patrol_route.py](examples/patrol_route.py) | 直接在程式碼裡組出一段完整的多點位巡邏路線，相對於目前位置，含 CNT 混合跟一段直線動作 |
 | [trace_motion.py](examples/trace_motion.py) | 用 S7 連線背景記錄一段移動的實際軌跡 |
 
 這裡列的都是英文版，想看中文版的話去

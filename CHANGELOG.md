@@ -6,6 +6,15 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- `examples/patrol_route.py` (and the Traditional Chinese version in
+  `examples/chinese/`): a complete multi-point patrol loop built
+  directly in code, relative to wherever the robot currently is,
+  using `move_joint()`/`move_pose()` with CNT blending between
+  waypoints and one linear Cartesian leg, distinct from
+  `move_sequence.py`'s file-driven waypoint runner.
+
 ## [1.1.4] - 2026-08-31
 
 Renamed the PyPI distribution from `fanuc` to `fanuc-python`, to avoid

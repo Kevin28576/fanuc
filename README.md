@@ -166,6 +166,7 @@ than the docs:
 | [robot_app.py](examples/robot_app.py) | The `RobotApp` task framework's lifecycle |
 | [record_waypoints.py](examples/record_waypoints.py) | Jogging by hand, pressing Enter to record waypoints |
 | [move_sequence.py](examples/move_sequence.py) | Reading a waypoint JSON and running it in order (with a preflight check) |
+| [patrol_route.py](examples/patrol_route.py) | A complete multi-point loop built in code, relative to the current position, with CNT blending and a linear leg |
 | [trace_motion.py](examples/trace_motion.py) | Recording a move's actual trajectory in the background over the S7 connection |
 
 These are the English versions. The Chinese version, with matching
