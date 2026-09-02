@@ -23,6 +23,12 @@
 > - [黃勇益、王朝仕、粘昰薪、陳冠叡。〈機械手臂資訊擷取與檢測應用〉。收入《TANET2019 臺灣網際網路研討會》，頁1059-1063。國立中山大學，2019。DOI: 10.6924/TANET.201909.0192](https://doi.org/10.6924/TANET.201909.0192)
 > - [杜彥頤。〈工研院機器手臂動態控制器－使用者自訂函數介紹〉。《機械工業雜誌》第400期（2016）：頁17-28。DOI: 10.30256/JIM.201607_(400).0004](https://doi.org/10.30256/JIM.201607_%28400%29.0004)
 
+`driver/` 底下的 KAREL 程式主要改自
+[fanucpy](https://github.com/torayeff/fanucpy) 的 MAPPDK driver。
+詳細的逐檔案異動說明見 [NOTICE](NOTICE)，包含哪些保留原樣、修了哪些
+問題（含幾個繼承自上游、上游至今仍未修的 bug），以及這個專案後續
+另外加上的功能。
+
 ## 測試環境
 
 本專案使用的機械手臂為 FANUC [ER-4iA](https://www.fanucamerica.com/products/robot/er-4ia)

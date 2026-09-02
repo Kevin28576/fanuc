@@ -23,6 +23,12 @@ this project follows [Semantic Versioning](https://semver.org/).
 - `CITATION.cff` at the repo root, so GitHub renders a "Cite this
   repository" button; a "Citing this project" section with the same
   information as BibTeX in both READMEs.
+- A note in both READMEs, right after the "inspired by" citations,
+  pointing out that `driver/` is primarily derived from
+  [fanucpy](https://github.com/torayeff/fanucpy)'s MAPPDK driver and
+  linking to [NOTICE](NOTICE) for the file-by-file account of what
+  changed. `NOTICE` itself now also documents the `STRING[1]` ->
+  `STRING[254]` fix as a modification, which had been missing from it.
 
 ### Fixed
 

@@ -48,6 +48,12 @@
 >   Machinery], (400), 17-28. DOI:
 >   10.30256/JIM.201607_(400).0004](https://doi.org/10.30256/JIM.201607_%28400%29.0004)
 
+The `driver/` KAREL programs are primarily derived from
+[fanucpy](https://github.com/torayeff/fanucpy)'s MAPPDK driver. See
+[NOTICE](NOTICE) for the detailed, file-by-file account of what was
+kept, what was fixed (including bugs inherited from upstream, some
+still open there), and what this project added on top.
+
 ## Test environment
 
 This project uses a FANUC [ER-4iA](https://www.fanucamerica.com/products/robot/er-4ia)

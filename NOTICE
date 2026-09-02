@@ -33,6 +33,18 @@ modifications made to the original files:
       REGOPE, ERRS, FLBT), needed by the built-in functions the
       extension routines use.
     - Added %INCLUDE mappdk_ext.
+    - mappdk_server.kl only: uframe_str/tool_str were declared
+      STRING[1], one character too small for CNV_INT_STR's
+      space-padded output; a single-digit frame/tool number (this
+      project's own default UFRAMENUM 8, TOOLNUM 1 included) already
+      overflowed it, silently truncating the string and breaking the
+      GET_VAR calls that refresh $UFRAME/$UTOOL after selecting a
+      non-default frame. Same bug reported against upstream
+      (torayeff/fanucpy#30, still open there at the time of this
+      writing), and likely the cause of a related symptom reported
+      there too (torayeff/fanucpy#22, #28: get_curpos() not matching
+      the TP display after selecting a non-default UFRAME). Widened
+      to STRING[254] here and verified on real hardware.
 
   driver/upload/mappdk.ls
   driver/upload/mappdk_move.ls
