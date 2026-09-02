@@ -29,7 +29,10 @@ this project follows [Semantic Versioning](https://semver.org/).
   own default `UFRAMENUM 8`, `TOOLNUM 1` included) already overflowed
   the buffer, silently truncating it and breaking the `GET_VAR` calls
   that are supposed to refresh `$UFRAME`/`$UTOOL` after selecting a
-  non-default frame. Widened to `STRING[2]`. Same bug reported against
+  non-default frame. Widened to `STRING[254]`, matching every other
+  `CNV_INT_STR` output buffer in the driver, so raising `UFRAMENUM`/
+  `TOOLNUM` past a single digit for a different robot can't reopen the
+  same overflow. Same bug reported against
   upstream fanucpy
   ([torayeff/fanucpy#30](https://github.com/torayeff/fanucpy/issues/30)),
   and likely the cause of a related symptom reported there too

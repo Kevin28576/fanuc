@@ -34,17 +34,20 @@ VAR
     cmd:                STRING[254]
     resp:               STRING[254]
     keep_conn:          BOOLEAN
-    -- STRING[2], not STRING[1]: CNV_INT_STR's output is space-padded,
-    -- one character wider than the digit count it's converting. A
+    -- Not STRING[1]: CNV_INT_STR's output is space-padded, one
+    -- character wider than the digit count it's converting. A
     -- single-digit frame/tool number (the ER-4iA's default UFRAMENUM
     -- 8, TOOLNUM 1 included) already overflows STRING[1], silently
     -- truncating uframe_str/tool_str and breaking the GET_VAR calls
     -- below that refresh $UFRAME/$UTOOL -- upstream fanucpy hit the
     -- same bug (torayeff/fanucpy#30), and its likely fallout
     -- (torayeff/fanucpy#28: get_curpos() not matching the TP after
-    -- selecting a non-default UFRAME).
-    uframe_str:         STRING[2]
-    tool_str:           STRING[2]
+    -- selecting a non-default UFRAME). STRING[254] (not just [2]) so
+    -- raising UFRAMENUM/TOOLNUM past a single digit for a different
+    -- robot doesn't reopen the same overflow; matches the width
+    -- mappdk_ext.kl already uses for every other CNV_INT_STR output.
+    uframe_str:         STRING[254]
+    tool_str:           STRING[254]
     
 CONST
     SERVER_TAG_NUM = 8
