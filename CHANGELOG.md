@@ -38,11 +38,12 @@ this project follows [Semantic Versioning](https://semver.org/).
   and likely the cause of a related symptom reported there too
   ([torayeff/fanucpy#28](https://github.com/torayeff/fanucpy/issues/28):
   `get_curpos()` not matching the TP display after selecting a
-  non-default UFRAME). **The compiled `mappdk_server.pc` in
-  `driver/upload/` has not been regenerated** (this environment has no
-  `ktrans`); the fix only exists in the `.kl` source until someone
-  recompiles and re-verifies against real or virtual hardware, see
-  [driver/README.md](driver/README.md#compiling-after-a-code-change).
+  non-default UFRAME). Recompiled `driver/upload/mappdk_server.pc`
+  with ktrans V9.40 (matching the version this project's driver has
+  always compiled with); `mappdk_logger.kl` doesn't set `$UFRAME`/
+  `$UTOOL` at all and wasn't affected, so `mappdk_logger.pc` didn't
+  need recompiling for this fix. **Not yet re-verified against real or
+  virtual hardware.**
 
 ## [1.1.4] - 2026-08-31
 

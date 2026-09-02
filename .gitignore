@@ -16,6 +16,12 @@ htmlcov/
 build/
 dist/
 
+# ktrans compiles into whatever directory it's run from (driver/), a
+# copy is meant to be manually reviewed and committed to driver/upload/
+# instead; the loose driver/*.pc is a build byproduct, not the tracked
+# copy.
+/driver/*.pc
+
 # Editor
 .idea/
 *.iml
