@@ -158,6 +158,31 @@ def test_cmd_watch_stops_cleanly_on_ctrl_c(monkeypatch, capsys):
     assert bi("已停止", "stopped") in capsys.readouterr().out
 
 
+def test_cmd_watch_enables_ansi_on_windows_only(monkeypatch, capsys):
+    """os.system("") is the standard trick for getting an older
+    Windows console to process ANSI escapes; every other platform's
+    terminal already handles that natively, so it should only run
+    there, not pay for a pointless shell spawn elsewhere."""
+    def _sleep_then_interrupt(seconds):
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(FanucRobot, "get_curpos", lambda self: Pose.from_list([0, 0, 0, 0, 0, 0]))
+    monkeypatch.setattr(FanucRobot, "get_curjpos", lambda self: Joints.from_list([0, 0, 0, 0, 0, 0]))
+    monkeypatch.setattr("time.sleep", _sleep_then_interrupt)
+
+    calls = []
+    monkeypatch.setattr("os.system", lambda cmd: calls.append(cmd))
+
+    monkeypatch.setattr("sys.platform", "win32")
+    assert main(["watch", "-i", "0.01"]) == 0
+    assert calls == [""]
+
+    calls.clear()
+    monkeypatch.setattr("sys.platform", "linux")
+    assert main(["watch", "-i", "0.01"]) == 0
+    assert calls == []
+
+
 # -- io ------------------------------------------------------------------------
 
 def test_cmd_io_get_rdo(monkeypatch, capsys):

@@ -6,6 +6,17 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `cmd_watch`'s `os.system("")` (the standard trick for getting an
+  older Windows console to process ANSI escapes) ran unconditionally
+  on every platform, spawning a pointless empty shell on Linux/macOS
+  where terminals already handle ANSI natively. Gated to
+  `sys.platform == "win32"`. Flagged by CodeFactor, now indexing this
+  repo (grade A); the underlying `os.system` call itself was already
+  safe (a hardcoded empty string, no injection surface), the actual
+  issue was that it ran somewhere it didn't need to.
+
 ## [1.1.6] - 2026-09-02
 
 ### Changed

@@ -183,7 +183,14 @@ def cmd_watch(args: argparse.Namespace) -> int:
         print(bi("[錯誤] --interval 必須大於 0", "[error] --interval must be > 0"), file=sys.stderr)
         return 2
 
-    os.system("")  # enable ANSI escapes on older Windows consoles
+    if sys.platform == "win32":
+        # Empty command, no shell work actually happens; os.system("")
+        # is the standard trick for making an older Windows console
+        # process ANSI escapes, as a side effect of the call. Every
+        # other platform's terminal already handles ANSI natively, so
+        # this is gated to win32 instead of paying for a pointless
+        # shell spawn on every "fanuc watch" run elsewhere.
+        os.system("")
 
     with _build_robot(args) as robot:
         header = bi(f"已連線: {robot.model} @ {robot.host}:{robot.port}",
