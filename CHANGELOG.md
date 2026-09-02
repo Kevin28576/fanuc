@@ -6,6 +6,8 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.7] - 2026-09-02
+
 ### Fixed
 
 - `cmd_watch`'s `os.system("")` (the standard trick for getting an
@@ -268,7 +270,8 @@ release. Kept here for the record of what that snapshot looked like.
 - `py.typed` marker; the whole `src/fanuc/` package passes
   `mypy --strict`.
 
-[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.6...HEAD
+[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.7...HEAD
+[1.1.7]: https://github.com/Kevin28576/fanuc/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/Kevin28576/fanuc/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/Kevin28576/fanuc/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/Kevin28576/fanuc/compare/v1.1.3...v1.1.4
