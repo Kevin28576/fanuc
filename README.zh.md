@@ -39,7 +39,7 @@
 提供機器使用空間與相關資源，特此致謝。
 
 [![PyPI](https://img.shields.io/pypi/v/fanuc-python)](https://pypi.org/project/fanuc-python/)
-[![Downloads](https://img.shields.io/pypi/dm/fanuc-python)](https://pypistats.org/packages/fanuc-python)
+[![Downloads](https://static.pepy.tech/badge/fanuc-python)](https://pepy.tech/project/fanuc-python)
 [![Python versions](https://img.shields.io/pypi/pyversions/fanuc-python)](https://pypi.org/project/fanuc-python/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![CI](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml/badge.svg)](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml)

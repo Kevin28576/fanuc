@@ -6,6 +6,16 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- Downloads badge switched from `img.shields.io/pypi/dm/fanuc-python`
+  (pypistats.org-backed) to `static.pepy.tech/badge/fanuc-python`: the
+  shields.io badge intermittently shows "rate limited by upstream
+  service" instead of a number, a recurring characteristic of that
+  badge source, not something specific to this project. pepy.tech now
+  has the package indexed (it didn't yet the first time this was
+  tried, right after the initial release).
+
 ## [1.1.5] - 2026-09-02
 
 ### Added
