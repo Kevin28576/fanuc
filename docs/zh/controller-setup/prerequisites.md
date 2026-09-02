@@ -65,4 +65,4 @@ options 更新，進 virtual robot edit wizard 把兩個選項加進去。這步
 確認完，繼續看[伺服器 tag 設定](server-tags.md)。
 
 ---
-*最後更新：2026-08-31*
+*最後更新：2026-09-02*
