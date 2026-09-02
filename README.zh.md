@@ -78,6 +78,7 @@
 - [driver 支援的指令](#driver-支援的指令)
 - [driver/ 目錄](#driver-目錄)
 - [目錄結構](#目錄結構)
+- [引用本專案](#引用本專案)
 - [版本紀錄](#版本紀錄)
 - [授權](#授權)
 
@@ -408,6 +409,22 @@ fanuc/
 ├── tests/       協定測試
 ├── driver/      KAREL 原始碼（driver/upload/ 是要上傳到控制器的檔案）
 └── docs/        設定與協定文件（英文，docs/zh/ 是中文版，結構一一對應）
+```
+
+## 引用本專案
+
+如果這個套件對你的學術研究有幫助，歡迎引用；機器可讀版本在
+[CITATION.cff](CITATION.cff)（GitHub 會用這個檔案自動產生「Cite this
+repository」按鈕），這裡附上同樣內容的 BibTeX：
+
+```bibtex
+@software{tai_fanuc_python,
+  author  = {Tai, Tzu-Heng},
+  title   = {fanuc-python: a Python driver for FANUC robots over MAPPDK},
+  url     = {https://github.com/Kevin28576/fanuc},
+  version = {1.1.4},
+  year    = {2026}
+}
 ```
 
 ## 版本紀錄

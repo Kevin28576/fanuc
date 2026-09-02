@@ -20,6 +20,9 @@ this project follows [Semantic Versioning](https://semver.org/).
   interface/IP configured on real hardware, a stale connection still
   holding the port), and that it's a controller-side prerequisite
   issue, not something either driver's KAREL code can fix.
+- `CITATION.cff` at the repo root, so GitHub renders a "Cite this
+  repository" button; a "Citing this project" section with the same
+  information as BibTeX in both READMEs.
 
 ### Fixed
 

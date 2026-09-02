@@ -110,6 +110,7 @@ This repository has two parts:
 - [Commands the driver supports](#commands-the-driver-supports)
 - [The driver/ directory](#the-driver-directory)
 - [Directory layout](#directory-layout)
+- [Citing this project](#citing-this-project)
 - [Changelog](#changelog)
 - [License](#license)
 
@@ -481,6 +482,23 @@ fanuc/
 ├── tests/       protocol tests
 ├── driver/      KAREL source (driver/upload/ is what gets uploaded to the controller)
 └── docs/        setup and protocol docs (docs/zh/ is the Chinese version, structure matches)
+```
+
+## Citing this project
+
+If this package is useful in your own academic work, please cite it;
+[CITATION.cff](CITATION.cff) has the machine-readable version (GitHub
+renders a "Cite this repository" button from it), and here's the same
+information as BibTeX:
+
+```bibtex
+@software{tai_fanuc_python,
+  author  = {Tai, Tzu-Heng},
+  title   = {fanuc-python: a Python driver for FANUC robots over MAPPDK},
+  url     = {https://github.com/Kevin28576/fanuc},
+  version = {1.1.4},
+  year    = {2026}
+}
 ```
 
 ## Changelog

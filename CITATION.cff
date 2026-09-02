@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "fanuc-python: a Python driver for FANUC robots over MAPPDK"
+authors:
+  - family-names: "Tai"
+    given-names: "Tzu-Heng"
+    alias: "戴梓恆"
+    email: "0918150353yuiop@gmail.com"
+repository-code: "https://github.com/Kevin28576/fanuc"
+url: "https://pypi.org/project/fanuc-python/"
+license: Apache-2.0
+version: 1.1.4
+date-released: "2026-08-31"
+keywords:
+  - fanuc
+  - robotics
+  - industrial-robot
+  - karel
+  - mappdk
