@@ -14,6 +14,32 @@ this project follows [Semantic Versioning](https://semver.org/).
   using `move_joint()`/`move_pose()` with CNT blending between
   waypoints and one linear Cartesian leg, distinct from
   `move_sequence.py`'s file-driven waypoint runner.
+- `PRIO-230 Ethernet Adapter error` documented in
+  `docs/controller-setup/prerequisites.md` (and the Chinese version):
+  what to check (R648 actually installed, the controller's Ethernet
+  interface/IP configured on real hardware, a stale connection still
+  holding the port), and that it's a controller-side prerequisite
+  issue, not something either driver's KAREL code can fix.
+
+### Fixed
+
+- `driver/mappdk_server.kl`'s `uframe_str`/`tool_str` were declared as
+  `STRING[1]`, one character too small for `CNV_INT_STR`'s
+  space-padded output; a single-digit frame/tool number (the ER-4iA's
+  own default `UFRAMENUM 8`, `TOOLNUM 1` included) already overflowed
+  the buffer, silently truncating it and breaking the `GET_VAR` calls
+  that are supposed to refresh `$UFRAME`/`$UTOOL` after selecting a
+  non-default frame. Widened to `STRING[2]`. Same bug reported against
+  upstream fanucpy
+  ([torayeff/fanucpy#30](https://github.com/torayeff/fanucpy/issues/30)),
+  and likely the cause of a related symptom reported there too
+  ([torayeff/fanucpy#28](https://github.com/torayeff/fanucpy/issues/28):
+  `get_curpos()` not matching the TP display after selecting a
+  non-default UFRAME). **The compiled `mappdk_server.pc` in
+  `driver/upload/` has not been regenerated** (this environment has no
+  `ktrans`); the fix only exists in the `.kl` source until someone
+  recompiles and re-verifies against real or virtual hardware, see
+  [driver/README.md](driver/README.md#compiling-after-a-code-change).
 
 ## [1.1.4] - 2026-08-31
 

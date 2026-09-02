@@ -56,6 +56,32 @@ this robot in ROBOGUIDE, and add both options in the virtual robot
 edit wizard. There's no way around this step; without the options
 installed, nothing after this works.
 
+## `PRIO-230 Ethernet Adapter error`
+
+If `OPEN_COMM` fails with this alarm when `MAPPDK_SERVER`/`MAPPDK_LOGGER`
+first tries to open its socket, it means the controller's networking
+side isn't ready for `R648` to actually talk over Ethernet, not a bug
+in this project's driver. Recheck, in order:
+
+1. **R648 (User Socket Messaging) is actually installed**, not just
+   R632; the two options are easy to conflate since both matter here,
+   but only R648 covers the socket-level communication this alarm is
+   about.
+2. **On real hardware** (this doesn't apply to the ROBOGUIDE virtual
+   controller): the controller's Ethernet interface is physically
+   connected and has an IP address configured (`MENU` → `SETUP` →
+   `Host Comm` → `TCP/IP`). A robot fresh out of the box, or one
+   that's never had its network settings touched, commonly hits this.
+3. **The port isn't already in use** by another server tag or a
+   stale connection from a previous run that never closed cleanly;
+   `AUX` → `ABORT` and a `RESET` (see [running the
+   driver](running.md)) clears most of these.
+
+This alarm has been reported against upstream fanucpy too
+([torayeff/fanucpy#35](https://github.com/torayeff/fanucpy/issues/35)),
+consistent with it being a controller-side prerequisite rather than
+something either driver's KAREL code can fix.
+
 Confirmed both? Continue to [server tags](server-tags.md).
 
 ---

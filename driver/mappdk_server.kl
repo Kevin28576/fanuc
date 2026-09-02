@@ -34,8 +34,17 @@ VAR
     cmd:                STRING[254]
     resp:               STRING[254]
     keep_conn:          BOOLEAN
-    uframe_str:         STRING[1]
-    tool_str:           STRING[1]
+    -- STRING[2], not STRING[1]: CNV_INT_STR's output is space-padded,
+    -- one character wider than the digit count it's converting. A
+    -- single-digit frame/tool number (the ER-4iA's default UFRAMENUM
+    -- 8, TOOLNUM 1 included) already overflows STRING[1], silently
+    -- truncating uframe_str/tool_str and breaking the GET_VAR calls
+    -- below that refresh $UFRAME/$UTOOL -- upstream fanucpy hit the
+    -- same bug (torayeff/fanucpy#30), and its likely fallout
+    -- (torayeff/fanucpy#28: get_curpos() not matching the TP after
+    -- selecting a non-default UFRAME).
+    uframe_str:         STRING[2]
+    tool_str:           STRING[2]
     
 CONST
     SERVER_TAG_NUM = 8
