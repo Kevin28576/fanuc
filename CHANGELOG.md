@@ -16,6 +16,13 @@ this project follows [Semantic Versioning](https://semver.org/).
   has the package indexed (it didn't yet the first time this was
   tried, right after the initial release).
 
+### Added
+
+- Three more README badges: `mypy: strict` (the whole `src/fanuc/`
+  package passes `mypy --strict` in CI, previously not shown
+  anywhere), PyPI development status (`Production/Stable`, matching
+  the `pyproject.toml` classifier), and GitHub last-commit activity.
+
 ## [1.1.5] - 2026-09-02
 
 ### Added

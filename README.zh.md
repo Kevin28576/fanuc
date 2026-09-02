@@ -41,9 +41,12 @@
 [![PyPI](https://img.shields.io/pypi/v/fanuc-python)](https://pypi.org/project/fanuc-python/)
 [![Downloads](https://static.pepy.tech/badge/fanuc-python)](https://pepy.tech/project/fanuc-python)
 [![Python versions](https://img.shields.io/pypi/pyversions/fanuc-python)](https://pypi.org/project/fanuc-python/)
+[![PyPI status](https://img.shields.io/pypi/status/fanuc-python)](https://pypi.org/project/fanuc-python/)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
 [![CI](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml/badge.svg)](https://github.com/Kevin28576/fanuc/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/Kevin28576/fanuc/branch/main/graph/badge.svg)](https://codecov.io/gh/Kevin28576/fanuc)
+[![mypy: strict](https://img.shields.io/badge/mypy-strict-blue)](https://github.com/Kevin28576/fanuc/blob/main/.github/workflows/ci.yml)
+[![Last commit](https://img.shields.io/github/last-commit/Kevin28576/fanuc)](https://github.com/Kevin28576/fanuc/commits/main)
 
 用 Python 操作 FANUC 機器人的工具，底層是 MAPPDK 的 KAREL driver。可以讀寫
 目前位置、關節角度、暫存器、數位 I/O，控制夾爪開合，下移動指令、跑 TP
