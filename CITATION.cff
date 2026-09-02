@@ -10,8 +10,8 @@ authors:
 repository-code: "https://github.com/Kevin28576/fanuc"
 url: "https://pypi.org/project/fanuc-python/"
 license: Apache-2.0
-version: 1.1.4
-date-released: "2026-08-31"
+version: 1.1.5
+date-released: "2026-09-02"
 keywords:
   - fanuc
   - robotics
