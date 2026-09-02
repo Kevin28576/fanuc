@@ -42,8 +42,8 @@ this project follows [Semantic Versioning](https://semver.org/).
   with ktrans V9.40 (matching the version this project's driver has
   always compiled with); `mappdk_logger.kl` doesn't set `$UFRAME`/
   `$UTOOL` at all and wasn't affected, so `mappdk_logger.pc` didn't
-  need recompiling for this fix. **Not yet re-verified against real or
-  virtual hardware.**
+  need recompiling for this fix. Verified: after selecting a
+  non-default UFRAME, `get_curpos()` now matches the TP display.
 
 ## [1.1.4] - 2026-08-31
 
