@@ -71,8 +71,26 @@
 > 但做起來不難，也值得做，見
 > [docs/zh/controller-setup/server-tags.md](docs/zh/controller-setup/server-tags.md#改用非預設的-port)。
 
+## 跟同類專案比較
+
+還有幾套跟 FANUC 控制器溝通的 Python 套件，走的協定各不相同、取捨
+也不一樣；這裡不是要排名，單純列出每套實際需要什麼：
+
+| | 協定 | 額外的執行期依賴 | 授權 |
+| --- | --- | --- | --- |
+| **fanuc-python**（本專案） | MAPPDK，自己編譯上傳的客製 KAREL driver | 無 | Apache-2.0 |
+| [fanucpy](https://github.com/torayeff/fanucpy) | MAPPDK，跟本專案 `driver/` 同一個 driver 家族改來的 | numpy、scipy | Apache-2.0 |
+| [pyfanuc](https://pypi.org/project/pyfanuc/) | FOCAS，透過 `fwlipy` 綁定 | fwlipy | MIT |
+| [UnderAutomation.Fanuc](https://pypi.org/project/UnderAutomation.Fanuc/) | CGTP / Telnet KCL / SNPX / FTP / RMI，官方協定，不用自己寫 driver | pythonnet（Linux 上還要 .NET Core） | 商業授權（30 天試用） |
+
+MAPPDK 需要在控制器上跑一支 KAREL driver（本專案已經附了一份，見
+[driver/](driver/README.md)），協定本身沒有認證機制（見上方警告）；
+FOCAS 跟 UnderAutomation.Fanuc 用的官方協定不需要自己寫 driver，
+代價是要另外裝一個綁定函式庫，或是要付費取得商業授權。
+
 ## 目錄
 
+- [跟同類專案比較](#跟同類專案比較)
 - [測試環境](#測試環境)
 - [安裝](#安裝)
 - [快速開始](#快速開始)

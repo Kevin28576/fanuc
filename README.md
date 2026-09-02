@@ -104,8 +104,28 @@ This repository has two parts:
 > authentication, but it's straightforward and worth doing anyway; see
 > [docs/controller-setup/server-tags.md](docs/controller-setup/server-tags.md#using-a-non-default-port).
 
+## How this compares
+
+A few other Python packages talk to FANUC controllers, over
+genuinely different protocols with different tradeoffs; this isn't a
+ranking, just what each one actually requires:
+
+| | Protocol | Extra runtime dependencies | License |
+| --- | --- | --- | --- |
+| **fanuc-python** (this) | MAPPDK, over a custom KAREL driver you build and upload yourself | none | Apache-2.0 |
+| [fanucpy](https://github.com/torayeff/fanucpy) | MAPPDK, same driver family this project's `driver/` is derived from | numpy, scipy | Apache-2.0 |
+| [pyfanuc](https://pypi.org/project/pyfanuc/) | FOCAS, via the `fwlipy` bindings | fwlipy | MIT |
+| [UnderAutomation.Fanuc](https://pypi.org/project/UnderAutomation.Fanuc/) | CGTP / Telnet KCL / SNPX / FTP / RMI, official protocols, no custom driver to write | pythonnet (+ .NET Core on Linux) | Commercial (30-day trial) |
+
+MAPPDK needs a KAREL driver on the controller (this project ships one,
+see [driver/](driver/README.md)) and has no protocol-level
+authentication (see the caution above); FOCAS and the official
+protocols UnderAutomation.Fanuc uses don't need a custom driver, at
+the cost of a separate binding library or a commercial license.
+
 ## Contents
 
+- [How this compares](#how-this-compares)
 - [Test environment](#test-environment)
 - [Install](#install)
 - [Quick start](#quick-start)

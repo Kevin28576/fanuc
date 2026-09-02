@@ -22,6 +22,15 @@ this project follows [Semantic Versioning](https://semver.org/).
   package passes `mypy --strict` in CI, previously not shown
   anywhere), PyPI development status (`Production/Stable`, matching
   the `pyproject.toml` classifier), and GitHub last-commit activity.
+- `--cov-fail-under=90` on CI's `pytest` step: coverage is genuinely
+  at 100% right now, but nothing was actually enforcing that it stay
+  there; a future change that quietly drops coverage would previously
+  have still gone green. The 90% floor leaves some room without
+  letting a real regression pass silently.
+- A "How this compares" section in both READMEs: a factual table
+  against `fanucpy`, `pyfanuc`, and `UnderAutomation.Fanuc` (protocol
+  used, extra runtime dependencies, license), sourced from each
+  project's own `pyproject.toml`/PyPI page rather than guessed.
 
 ## [1.1.5] - 2026-09-02
 
