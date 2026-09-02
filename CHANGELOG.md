@@ -6,6 +6,8 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.1.6] - 2026-09-02
+
 ### Changed
 
 - Downloads badge switched from `img.shields.io/pypi/dm/fanuc-python`
@@ -255,7 +257,8 @@ release. Kept here for the record of what that snapshot looked like.
 - `py.typed` marker; the whole `src/fanuc/` package passes
   `mypy --strict`.
 
-[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.5...HEAD
+[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.6...HEAD
+[1.1.6]: https://github.com/Kevin28576/fanuc/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/Kevin28576/fanuc/compare/v1.1.4...v1.1.5
 [1.1.4]: https://github.com/Kevin28576/fanuc/compare/v1.1.3...v1.1.4
 [1.1.3]: https://github.com/Kevin28576/fanuc/compare/v1.1.2...v1.1.3
