@@ -6,6 +6,8 @@ this project follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-09-05
+
 ### Added
 
 - `fanuc.kinematics`: offline forward/inverse kinematics for the
@@ -294,7 +296,8 @@ release. Kept here for the record of what that snapshot looked like.
 - `py.typed` marker; the whole `src/fanuc/` package passes
   `mypy --strict`.
 
-[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.1.7...HEAD
+[Unreleased]: https://github.com/Kevin28576/fanuc/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/Kevin28576/fanuc/compare/v1.1.7...v1.2.0
 [1.1.7]: https://github.com/Kevin28576/fanuc/compare/v1.1.6...v1.1.7
 [1.1.6]: https://github.com/Kevin28576/fanuc/compare/v1.1.5...v1.1.6
 [1.1.5]: https://github.com/Kevin28576/fanuc/compare/v1.1.4...v1.1.5

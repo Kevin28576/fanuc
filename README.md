@@ -525,7 +525,7 @@ information as BibTeX:
   author  = {Tai, Tzu-Heng},
   title   = {fanuc-python: a Python driver for FANUC robots over MAPPDK},
   url     = {https://github.com/Kevin28576/fanuc},
-  version = {1.1.7},
+  version = {1.2.0},
   year    = {2026}
 }
 ```
