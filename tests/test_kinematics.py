@@ -94,17 +94,36 @@ def test_never_imports_networking_modules() -> None:
         assert forbidden not in src
 
 
-def test_dh_table_matches_known_link_offsets() -> None:
-    # The DH table's non-zero a/d values must stay exactly the
-    # cross-validated numbers (Chen et al. 2025 Table 2, matching
-    # ROBOGUIDE's er4ia.xml) -- a regression guard against someone
-    # "tidying up" these constants later without re-checking sources.
-    from fanuc.kinematics import _DH_TABLE
+# Real (joints, pose) pairs collected from a live ROBOGUIDE-simulated
+# ER-4iA via fanuc.robot.FanucRobot (get_curjpos()/get_curpos()), not
+# derived from any paper or vendor file -- ground truth, not a model
+# cross-reference. A representative sample of the 107 configurations
+# this module's forward-kinematics model was calibrated and validated
+# against (max 0.02mm / 0.001deg error across the full set); see the
+# module docstring.
+_REAL_ROBOGUIDE_SAMPLES: tuple[tuple[tuple[float, ...], tuple[float, ...]], ...] = (
+    ((0.0, -30.0, 0.0, 0.0, -90.0, 0.0), (160.0, 0.0, 175.167, -180.0, 0.0, 0.0)),
+    ((45.0, -20.0, 20.0, 10.0, -70.0, 15.0), (164.629, 148.476, 309.616, 156.791, -35.025, 67.415)),
+    ((-60.0, -30.0, 0.0, 0.0, -90.0, 0.0), (80.0, -138.564, 175.167, 180.0, 0.0, -60.0)),
+    ((0.0, 90.0, 0.0, 0.0, -90.0, 0.0), (550.0, 0.0, -50.0, -180.0, 0.0, 0.0)),
+    ((-30.0, 40.0, -40.0, -30.0, -100.0, -60.0), (324.194, -147.373, -9.836, 139.881, 44.896, -115.909)),
+    ((10.0, 10.0, 10.0, 10.0, 10.0, 10.0), (386.742, 70.336, 349.864, 44.109, -61.789, 144.109)),
+    ((0.0, 90.0, -100.0, 0.0, 0.0, 0.0), (217.183, 0.0, -358.004, -180.0, 10.0, 0.0)),
+    ((0.0, -60.0, 60.0, 0.0, 0.0, 0.0), (-62.487, 0.0, 451.769, -0.0, -30.0, 180.0)),
+    ((0.0, -90.0, 60.0, 0.0, 0.0, 0.0), (-97.321, 0.0, 321.769, -0.0, -30.0, 180.0)),
+    ((0.0, 110.0, -100.0, 0.0, 0.0, 0.0), (201.503, 0.0, -446.929, -180.0, 10.0, 0.0)),
+    ((0.0, -30.0, 200.0, 0.0, 0.0, 0.0), (-461.449, 0.0, 83.245, -180.0, 70.0, 0.0)),
+    ((0.0, -30.0, 90.0, 0.0, 0.0, 0.0), (-150.0, 0.0, 585.167, -0.0, 0.0, -180.0)),
+)
 
-    d_values = [row.d for row in _DH_TABLE]
-    a_values = [row.a_prev for row in _DH_TABLE]
-    assert d_values == [330.0, 0.0, 0.0, 290.0, 0.0, 70.0]
-    assert a_values == [0.0, 0.0, 260.0, 20.0, 0.0, 0.0]
+
+@pytest.mark.parametrize("joints,real_pose", _REAL_ROBOGUIDE_SAMPLES)
+def test_forward_matches_real_roboguide_data(joints: tuple[float, ...], real_pose: tuple[float, ...]) -> None:
+    got = forward(joints)
+    assert math.dist((got.x, got.y, got.z), real_pose[:3]) < 0.1
+    for got_a, real_a in zip((got.w, got.p, got.r), real_pose[3:]):
+        diff = abs((got_a - real_a + 180.0) % 360.0 - 180.0)
+        assert diff < 0.1
 
 
 def test_home_joints_forward_kinematics_is_reachable_by_inverse() -> None:

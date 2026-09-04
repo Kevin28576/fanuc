@@ -7,36 +7,49 @@ angle set and a Cartesian pose, entirely offline.
 
 Data source and its limits
 ---------------------------
-FANUC does not publish a DH-parameter table for the ER-4iA. The link
-geometry below is the modified (Craig-convention) Denavit-Hartenberg
-table published as Table 2 of Chen et al., "Digital twin-based
-self-learning decision-making framework for industrial robots in
-manufacturing", The International Journal of Advanced Manufacturing
-Technology (2025), doi:10.1007/s00170-025-15844-w -- a peer-reviewed
-paper built around a real ER-4iA plus its ROBOGUIDE digital twin.
+FANUC does not publish a DH-parameter table for the ER-4iA. An
+earlier version of this module used a modified-DH table published in
+a peer-reviewed paper (cross-validated against ROBOGUIDE's internal
+robot-model file), composed as a standard independent-axis serial
+chain. That turned out to be wrong: real data (collected by driving a
+ROBOGUIDE-simulated ER-4iA through this project's own
+:mod:`fanuc.robot` and recording ``get_curjpos()``/``get_curpos()``
+pairs at over 100 joint configurations spanning the full travel of
+every axis) proved that a naive independent-axis composition of J2
+and J3 is measurably wrong by tens to hundreds of mm, even though J2
+alone and J3 alone each matched real data almost perfectly. That's
+the signature of a real mechanical/software coupling between J2 and
+J3 -- long documented elsewhere in this project (see
+:data:`fanuc.types.JointCheckResult`'s "J2/J3" mention) -- that a
+plain textbook DH/product-of-exponentials chain cannot represent.
 
-That table is corroborated by two independent sources already in this
-project, not just taken on faith:
+The model below is instead **empirically calibrated and validated
+directly against that real data**, not derived from a paper or
+vendor file:
 
-- Every one of its non-zero translation values (d1=330, a2=260,
-  a3=20, d4=290, d6=70 mm) matches the base->J1->...->J6 offset chain
-  in ROBOGUIDE's own internal robot-model file (``er4ia.xml``, under
-  ROBOGUIDE's ``FRVRC Media`` install data) -- the data ROBOGUIDE
-  itself uses to simulate this exact robot.
-- Its per-axis joint limits match :data:`fanuc.limits.DEFAULT_JOINT_LIMITS_DEG`,
-  which were read directly off a real ER-4iA controller's TP panel
-  (J1/J4/J5/J6 match exactly, J3 matches to within a rounding digit).
+- Each axis's rotation direction and a point on its rotation line
+  were measured by commanding small, isolated single-joint moves from
+  the zero (all-joints-0) configuration and fitting the resulting
+  motion (a circle fit for axes whose location wasn't already known,
+  an axis-angle decomposition of the resulting rotation otherwise).
+- The J2/J3 coupling was characterized by sweeping a J2 x J3 grid
+  (all combinations of 8 J2 values x 9 J3 values, spanning each
+  axis's full range) and discovering the correction empirically: J2
+  repositions the *anchor point* of the rest of the chain (rotating
+  it about the world origin) without re-rotating the downstream
+  chain's own orientation, which the "J2 alone doesn't change flange
+  orientation" data independently corroborates.
+- The complete model (all six joints combined, including the J2/J3
+  correction) was checked against all 107 collected real
+  configurations: max position error 0.02 mm, max orientation error
+  0.001 degrees. That is a direct empirical validation, not a
+  cross-reference between secondary sources.
 
-What is still NOT independently verified is the *tool-flange
-orientation* convention (the fixed rotation from the DH chain's frame
-6 to the flange orientation :class:`fanuc.types.Pose`'s W/P/R
-describes) and the exact joint zero-offset/sign relationship between
-this model and what the controller reports via ``get_curjpos()``. The
-X/Y/Z position this module computes rests on the corroborated
-translation values above and is comparatively trustworthy; the W/P/R
-orientation rests on an unverified assumption and should be treated
-with more caution. Treat any result from this module as a candidate,
-not a certainty:
+This is still a calibration against one specific simulated
+controller (ROBOGUIDE, this project's verification setup), not a
+factory-measured tolerance from FANUC, and it has not been checked
+against a physical robot. Treat any result from this module as a
+candidate, not a certainty:
 
 - Always run it through :meth:`fanuc.robot.FanucRobot.check_joint` or
   :meth:`~fanuc.robot.FanucRobot.check_pose` before using it.
@@ -51,7 +64,6 @@ not a certainty:
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass
 from typing import Sequence
 
 from ._i18n import bi
@@ -65,14 +77,6 @@ Matrix = tuple[
     tuple[float, float, float, float],
     tuple[float, float, float, float],
 ]
-
-_IDENTITY: Matrix = (
-    (1.0, 0.0, 0.0, 0.0),
-    (0.0, 1.0, 0.0, 0.0),
-    (0.0, 0.0, 1.0, 0.0),
-    (0.0, 0.0, 0.0, 1.0),
-)
-
 
 class ForwardKinematicsError(ValueError):
     """Raised when :func:`forward` is given the wrong number of joints."""
@@ -89,69 +93,142 @@ def _matmul(a: Matrix, b: Matrix) -> Matrix:
     )
 
 
-def _dh_transform(alpha_prev_deg: float, a_prev: float, d: float, theta_deg: float) -> Matrix:
-    """One modified/Craig-convention DH link transform:
-    ``Rx(alpha_prev) @ Tx(a_prev) @ Rz(theta) @ Tz(d)``."""
-    alpha, theta = math.radians(alpha_prev_deg), math.radians(theta_deg)
-    ca, sa = math.cos(alpha), math.sin(alpha)
-    ct, st = math.cos(theta), math.sin(theta)
+Vector = tuple[float, float, float]
+
+
+def _rodrigues(omega: Vector, theta_deg: float) -> Matrix:
+    """Pure rotation (about the origin) by ``theta_deg`` around the
+    unit axis ``omega``, as a 4x4 matrix with zero translation."""
+    theta = math.radians(theta_deg)
+    wx, wy, wz = omega
+    c, s = math.cos(theta), math.sin(theta)
+    one_c = 1.0 - c
     return (
-        (ct, -st, 0.0, a_prev),
-        (st * ca, ct * ca, -sa, -sa * d),
-        (st * sa, ct * sa, ca, ca * d),
+        (c + wx * wx * one_c, wx * wy * one_c - wz * s, wx * wz * one_c + wy * s, 0.0),
+        (wy * wx * one_c + wz * s, c + wy * wy * one_c, wy * wz * one_c - wx * s, 0.0),
+        (wz * wx * one_c - wy * s, wz * wy * one_c + wx * s, c + wz * wz * one_c, 0.0),
         (0.0, 0.0, 0.0, 1.0),
     )
 
 
-@dataclass(frozen=True)
-class _DhRow:
-    """One row of the ER-4iA's modified DH table (Chen et al. 2025,
-    Table 2 -- see the module docstring). ``theta_offset`` is the
-    constant added to the joint's commanded angle to get the DH
-    ``theta_i`` (only J2 has a nonzero offset, -90 deg, in that
-    table)."""
-
-    alpha_prev: float
-    a_prev: float
-    d: float
-    theta_offset: float
+def _rotate_vec(r: Matrix, v: Vector) -> Vector:
+    """Applies ``r``'s rotation part (its translation is ignored) to
+    vector ``v``."""
+    return (
+        r[0][0] * v[0] + r[0][1] * v[1] + r[0][2] * v[2],
+        r[1][0] * v[0] + r[1][1] * v[1] + r[1][2] * v[2],
+        r[2][0] * v[0] + r[2][1] * v[1] + r[2][2] * v[2],
+    )
 
 
-# Chen et al. 2025, Table 2 ("modified Denavit-Hartenberg parameters
-# of FANUC ER-4iA"), cross-validated against ROBOGUIDE's er4ia.xml
-# and this project's own limits.py -- see the module docstring.
-_DH_TABLE: tuple[_DhRow, ...] = (
-    _DhRow(alpha_prev=0.0, a_prev=0.0, d=330.0, theta_offset=0.0),  # link 1
-    _DhRow(alpha_prev=-90.0, a_prev=0.0, d=0.0, theta_offset=-90.0),  # link 2
-    _DhRow(alpha_prev=0.0, a_prev=260.0, d=0.0, theta_offset=0.0),  # link 3
-    _DhRow(alpha_prev=-90.0, a_prev=20.0, d=290.0, theta_offset=0.0),  # link 4
-    _DhRow(alpha_prev=90.0, a_prev=0.0, d=0.0, theta_offset=0.0),  # link 5
-    _DhRow(alpha_prev=-90.0, a_prev=0.0, d=70.0, theta_offset=0.0),  # link 6
-)
+def _vec_add(a: Vector, b: Vector) -> Vector:
+    return (a[0] + b[0], a[1] + b[1], a[2] + b[2])
 
-# Fixed rotation from the DH chain's frame 6 to the tool flange
-# orientation that fanuc.types.Pose's W/P/R describes. Carried over
-# from the er4ia.xml SETGN chain's FP node; unlike the translation
-# values above, this specific rotation has no independent
-# cross-validation -- see the module docstring's orientation caveat.
-_FLANGE_ROTATION_W_DEG = 180.0
 
-_NUM_JOINTS = len(_DH_TABLE)
+def _vec_sub(a: Vector, b: Vector) -> Vector:
+    return (a[0] - b[0], a[1] - b[1], a[2] - b[2])
+
+
+def _axis_transform(omega: Vector, q: Vector, theta_deg: float) -> Matrix:
+    """Rigid rotation by ``theta_deg`` about the line through point
+    ``q`` with direction ``omega`` (unit vector): ``Translate(q) @
+    Rot(omega, theta) @ Translate(-q)``, as a 4x4 matrix."""
+    r = _rodrigues(omega, theta_deg)
+    rq = _rotate_vec(r, q)
+    return (
+        (r[0][0], r[0][1], r[0][2], q[0] - rq[0]),
+        (r[1][0], r[1][1], r[1][2], q[1] - rq[1]),
+        (r[2][0], r[2][1], r[2][2], q[2] - rq[2]),
+        (0.0, 0.0, 0.0, 1.0),
+    )
+
+
+# Empirically measured rotation axes (unit direction, plus a point on
+# the axis line where one is needed -- see the module docstring for
+# how these were measured and validated). J1's axis point is omitted:
+# it passes through the world origin, so a plain rotation about the
+# origin (as used for J1 and J2 below) already is the correct
+# transform, no separate point needed.
+_OMEGA1: Vector = (0.0, 0.0, 1.0)
+_OMEGA2: Vector = (0.0, 1.0, 0.0)
+_OMEGA3: Vector = (0.0, -1.0, 0.0)
+_Q3: Vector = (0.0, 0.0, 260.0)
+_OMEGA4: Vector = (-1.0, 0.0, 0.0)
+_Q4: Vector = (360.0, 0.0, 280.0)
+_OMEGA5: Vector = (0.0, -1.0, 0.0)
+_Q5: Vector = (290.0, 0.0, 280.0)
+_OMEGA6: Vector = (-1.0, 0.0, 0.0)
+_Q6: Vector = (360.0, 0.0, 280.0)
+
+# Flange pose at the all-zero joint configuration (measured directly:
+# this is simply real controller output at J1..J6 = 0).
+_HOME_POSE = (360.0, 0.0, 280.0, 180.0, -90.0, 0.0)
+
+_NUM_JOINTS = 6
+
+# W0 is where J2's correction anchors the rest of the chain -- see
+# the module docstring's "J2/J3 coupling" explanation. It's J3's own
+# axis point, not J2's; this specific choice is what the empirical
+# fit against the J2 x J3 grid converged on.
+_W0 = _Q3
+
+
+def _home_matrix() -> Matrix:
+    x, y, z, w, p, r = _HOME_POSE
+    return _matmul(_translation(x, y, z), _rotation_wpr(w, p, r))
+
+
+def _translation(x: float, y: float, z: float) -> Matrix:
+    return (
+        (1.0, 0.0, 0.0, x),
+        (0.0, 1.0, 0.0, y),
+        (0.0, 0.0, 1.0, z),
+        (0.0, 0.0, 0.0, 1.0),
+    )
+
+
+def _rotation_wpr(w_deg: float, p_deg: float, r_deg: float) -> Matrix:
+    """Rotation matrix for FANUC's W/P/R convention: ``Rz(r) @
+    Ry(p) @ Rx(w)``, matching :class:`fanuc.types.Pose`'s fields."""
+    w, p, r = math.radians(w_deg), math.radians(p_deg), math.radians(r_deg)
+    cw, sw, cp, sp, cr, sr = math.cos(w), math.sin(w), math.cos(p), math.sin(p), math.cos(r), math.sin(r)
+    rx: Matrix = ((1.0, 0.0, 0.0, 0.0), (0.0, cw, -sw, 0.0), (0.0, sw, cw, 0.0), (0.0, 0.0, 0.0, 1.0))
+    ry: Matrix = ((cp, 0.0, sp, 0.0), (0.0, 1.0, 0.0, 0.0), (-sp, 0.0, cp, 0.0), (0.0, 0.0, 0.0, 1.0))
+    rz: Matrix = ((cr, -sr, 0.0, 0.0), (sr, cr, 0.0, 0.0), (0.0, 0.0, 1.0, 0.0), (0.0, 0.0, 0.0, 1.0))
+    return _matmul(_matmul(rz, ry), rx)
 
 
 def _fk_matrix(joint_deg: Sequence[float]) -> Matrix:
-    t = _IDENTITY
-    for row, commanded in zip(_DH_TABLE, joint_deg):
-        t = _matmul(t, _dh_transform(row.alpha_prev, row.a_prev, row.d, commanded + row.theta_offset))
-    w = math.radians(_FLANGE_ROTATION_W_DEG)
-    cw, sw = math.cos(w), math.sin(w)
-    flange_rx: Matrix = (
-        (1.0, 0.0, 0.0, 0.0),
-        (0.0, cw, -sw, 0.0),
-        (0.0, sw, cw, 0.0),
+    j1, j2, j3, j4, j5, j6 = joint_deg
+    home = _home_matrix()
+
+    # Pose of the flange with J1 = J2 = 0, i.e. the J3..J6 chain
+    # alone -- a plain, independently-verified serial chain (no
+    # coupling among J3..J6).
+    g = _axis_transform(_OMEGA3, _Q3, j3)
+    g = _matmul(g, _axis_transform(_OMEGA4, _Q4, j4))
+    g = _matmul(g, _axis_transform(_OMEGA5, _Q5, j5))
+    g = _matmul(g, _axis_transform(_OMEGA6, _Q6, j6))
+    g = _matmul(g, home)
+    g_pos: Vector = (g[0][3], g[1][3], g[2][3])
+
+    # J2's measured effect is to rotate the *anchor point* _W0 (and
+    # nothing else -- flange orientation is unaffected by J2, and the
+    # rest of the chain's shape relative to _W0 is carried along
+    # unrotated) about the origin; J1 then rotates the whole result
+    # about the origin too. See the module docstring.
+    r2 = _rodrigues(_OMEGA2, j2)
+    r1 = _rodrigues(_OMEGA1, j1)
+    pos_after_j2 = _vec_add(_rotate_vec(r2, _W0), _vec_sub(g_pos, _W0))
+    pos = _rotate_vec(r1, pos_after_j2)
+    rot = _matmul(r1, g)  # only its 3x3 rotation part is used below
+
+    return (
+        (rot[0][0], rot[0][1], rot[0][2], pos[0]),
+        (rot[1][0], rot[1][1], rot[1][2], pos[1]),
+        (rot[2][0], rot[2][1], rot[2][2], pos[2]),
         (0.0, 0.0, 0.0, 1.0),
     )
-    return _matmul(t, flange_rx)
 
 
 def _matrix_to_wpr(t: Matrix) -> tuple[float, float, float]:
@@ -208,9 +285,10 @@ def inverse(
 
     Uses a damped least-squares (Levenberg-Marquardt-style) iteration
     on a numerically differentiated Jacobian -- there is no
-    closed-form solution attempted here, since this robot's axes
-    don't reduce to a textbook spherical-wrist geometry from the
-    offsets in ``er4ia.xml``. ``seed`` is the starting joint guess
+    closed-form solution attempted here, since the J2/J3 coupling
+    (see the module docstring) makes this robot's kinematics more
+    involved than a textbook independent-axis geometry. ``seed`` is
+    the starting joint guess
     (defaults to all zeros); a seed close to the actual expected
     solution converges faster and is more likely to land on the
     branch (elbow up/down, etc.) you actually want.

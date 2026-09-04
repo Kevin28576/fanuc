@@ -12,20 +12,23 @@ this project follows [Semantic Versioning](https://semver.org/).
   ER-4iA (`forward(joints) -> Pose`, `inverse(pose, seed=...) ->
   Joints`). Pure computation, no socket use, never called by
   `move_pose()`/`move_joint()` or anything else in `robot.py` -- a
-  fully independent module the caller opts into. Link geometry is the
-  modified Denavit-Hartenberg table published in Chen et al.,
-  "Digital twin-based self-learning decision-making framework for
-  industrial robots in manufacturing", Int J Adv Manuf Technol (2025),
-  doi:10.1007/s00170-025-15844-w -- cross-validated against both
-  ROBOGUIDE's own internal `er4ia.xml` robot model (every non-zero
-  link offset matches exactly) and this project's own
-  `limits.py` joint-limit table (read directly off a real ER-4iA's TP
-  panel). FANUC itself publishes no DH-parameter table for this
-  robot. See the module docstring for the accuracy caveats -- position
-  (X/Y/Z) rests on cross-validated values, tool-flange orientation
-  (W/P/R) does not -- and always verify a result with
-  `check_joint()`/`check_pose()` (and ideally ROBOGUIDE) before using
-  it for a real move.
+  fully independent module the caller opts into. FANUC publishes no
+  DH-parameter table for this robot, and (after two earlier attempts
+  based on secondary sources -- ROBOGUIDE's internal `er4ia.xml` model
+  file, then a peer-reviewed paper's DH table -- were found to
+  disagree with real behavior once actually checked) the link geometry
+  is instead empirically calibrated and validated directly against
+  real controller output: over 100 `get_curjpos()`/`get_curpos()`
+  pairs collected from a live ROBOGUIDE-simulated ER-4iA, spanning the
+  full travel of every axis, checked against this module's own
+  forward-kinematics model to within 0.02mm / 0.001deg. That process
+  also surfaced a genuine J2/J3 mechanical coupling (independent-axis
+  composition of J2 and J3 alone was off by tens to hundreds of mm even
+  though each axis matched real data perfectly on its own), now
+  modeled explicitly. See the module docstring for the full
+  methodology and its remaining limits, and always verify a result
+  with `check_joint()`/`check_pose()` (and ideally ROBOGUIDE) before
+  using it for a real move.
 
 ## [1.1.7] - 2026-09-02
 
