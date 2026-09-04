@@ -4,6 +4,7 @@
     robot      FanucRobot class
     app        RobotApp task framework
     trace      motion trajectory recording (background thread + second connection)
+    kinematics offline forward/inverse kinematics (fanuc.kinematics), no socket use
     protocol   command string encoding/decoding
     transport  socket
     types      Pose / Joints / Alarm
