@@ -7,22 +7,36 @@ angle set and a Cartesian pose, entirely offline.
 
 Data source and its limits
 ---------------------------
-FANUC does not publish a DH-parameter table for the ER-4iA. The
-official Operator's Manual (B-83574EN) only has motion-envelope and
-installation-clearance drawings, not link geometry. The link offsets
-used here instead come from ROBOGUIDE's own internal robot-model file
-(``er4ia.xml``, under ROBOGUIDE's ``FRVRC Media`` install data) -- the
-same data ROBOGUIDE itself uses to simulate this robot. The
-translation magnitudes it contains (260, 20, 290, 70 mm) match values
-that also appear in the manual's Fig 3.2(a) operating-space drawing,
-which is the closest thing available to independent cross-validation.
+FANUC does not publish a DH-parameter table for the ER-4iA. The link
+geometry below is the modified (Craig-convention) Denavit-Hartenberg
+table published as Table 2 of Chen et al., "Digital twin-based
+self-learning decision-making framework for industrial robots in
+manufacturing", The International Journal of Advanced Manufacturing
+Technology (2025), doi:10.1007/s00170-025-15844-w -- a peer-reviewed
+paper built around a real ER-4iA plus its ROBOGUIDE digital twin.
 
-What is NOT independently verified is the *rotation* convention used
-to compose those offsets (this module assumes FANUC's usual W/P/R
-extrinsic-XYZ convention, matching :class:`fanuc.types.Pose`) and the
-exact joint zero-offset/sign relationship between this model and what
-the controller reports via ``get_curjpos()``. Treat any result from
-this module as a candidate, not a certainty:
+That table is corroborated by two independent sources already in this
+project, not just taken on faith:
+
+- Every one of its non-zero translation values (d1=330, a2=260,
+  a3=20, d4=290, d6=70 mm) matches the base->J1->...->J6 offset chain
+  in ROBOGUIDE's own internal robot-model file (``er4ia.xml``, under
+  ROBOGUIDE's ``FRVRC Media`` install data) -- the data ROBOGUIDE
+  itself uses to simulate this exact robot.
+- Its per-axis joint limits match :data:`fanuc.limits.DEFAULT_JOINT_LIMITS_DEG`,
+  which were read directly off a real ER-4iA controller's TP panel
+  (J1/J4/J5/J6 match exactly, J3 matches to within a rounding digit).
+
+What is still NOT independently verified is the *tool-flange
+orientation* convention (the fixed rotation from the DH chain's frame
+6 to the flange orientation :class:`fanuc.types.Pose`'s W/P/R
+describes) and the exact joint zero-offset/sign relationship between
+this model and what the controller reports via ``get_curjpos()``. The
+X/Y/Z position this module computes rests on the corroborated
+translation values above and is comparatively trustworthy; the W/P/R
+orientation rests on an unverified assumption and should be treated
+with more caution. Treat any result from this module as a candidate,
+not a certainty:
 
 - Always run it through :meth:`fanuc.robot.FanucRobot.check_joint` or
   :meth:`~fanuc.robot.FanucRobot.check_pose` before using it.
@@ -75,100 +89,69 @@ def _matmul(a: Matrix, b: Matrix) -> Matrix:
     )
 
 
-def _translation(x: float, y: float, z: float) -> Matrix:
+def _dh_transform(alpha_prev_deg: float, a_prev: float, d: float, theta_deg: float) -> Matrix:
+    """One modified/Craig-convention DH link transform:
+    ``Rx(alpha_prev) @ Tx(a_prev) @ Rz(theta) @ Tz(d)``."""
+    alpha, theta = math.radians(alpha_prev_deg), math.radians(theta_deg)
+    ca, sa = math.cos(alpha), math.sin(alpha)
+    ct, st = math.cos(theta), math.sin(theta)
     return (
-        (1.0, 0.0, 0.0, x),
-        (0.0, 1.0, 0.0, y),
-        (0.0, 0.0, 1.0, z),
-        (0.0, 0.0, 0.0, 1.0),
-    )
-
-
-def _rotation_wpr(w_deg: float, p_deg: float, r_deg: float) -> Matrix:
-    """Rotation matrix for FANUC's W/P/R convention: extrinsic
-    rotation about the fixed X axis by W, then fixed Y by P, then
-    fixed Z by R -- i.e. ``Rz(R) @ Ry(P) @ Rx(W)``, matching
-    :class:`fanuc.types.Pose`'s W/P/R fields."""
-    w, p, r = math.radians(w_deg), math.radians(p_deg), math.radians(r_deg)
-    cw, sw = math.cos(w), math.sin(w)
-    cp, sp = math.cos(p), math.sin(p)
-    cr, sr = math.cos(r), math.sin(r)
-    rx: Matrix = (
-        (1.0, 0.0, 0.0, 0.0),
-        (0.0, cw, -sw, 0.0),
-        (0.0, sw, cw, 0.0),
-        (0.0, 0.0, 0.0, 1.0),
-    )
-    ry: Matrix = (
-        (cp, 0.0, sp, 0.0),
-        (0.0, 1.0, 0.0, 0.0),
-        (-sp, 0.0, cp, 0.0),
-        (0.0, 0.0, 0.0, 1.0),
-    )
-    rz: Matrix = (
-        (cr, -sr, 0.0, 0.0),
-        (sr, cr, 0.0, 0.0),
-        (0.0, 0.0, 1.0, 0.0),
-        (0.0, 0.0, 0.0, 1.0),
-    )
-    return _matmul(_matmul(rz, ry), rx)
-
-
-def _rotation_z(deg: float) -> Matrix:
-    a = math.radians(deg)
-    c, s = math.cos(a), math.sin(a)
-    return (
-        (c, -s, 0.0, 0.0),
-        (s, c, 0.0, 0.0),
-        (0.0, 0.0, 1.0, 0.0),
+        (ct, -st, 0.0, a_prev),
+        (st * ca, ct * ca, -sa, -sa * d),
+        (st * sa, ct * sa, ca, ca * d),
         (0.0, 0.0, 0.0, 1.0),
     )
 
 
 @dataclass(frozen=True)
-class _Link:
-    """One joint's fixed transform from its parent joint frame, at
-    the zero posture, taken from ROBOGUIDE's er4ia.xml ``SETGN``
-    entries. The joint itself then rotates about its own local Z
-    axis (KAREL/ROBOGUIDE's SETAXS convention) by the joint's angle.
-    """
+class _DhRow:
+    """One row of the ER-4iA's modified DH table (Chen et al. 2025,
+    Table 2 -- see the module docstring). ``theta_offset`` is the
+    constant added to the joint's commanded angle to get the DH
+    ``theta_i`` (only J2 has a nonzero offset, -90 deg, in that
+    table)."""
 
-    dx: float
-    dy: float
-    dz: float
-    w: float
-    p: float
-    r: float
+    alpha_prev: float
+    a_prev: float
+    d: float
+    theta_offset: float
 
 
-# From er4ia.xml (ROBOGUIDE V9.40, robots/lrm200id/er4ia.xml), the
-# base->J1->J2->...->J6->flange SETGN chain. MOUNT_LOC (base plate to
-# J1 origin) is folded into _BASE.
-_BASE = _Link(0.0, 0.0, 330.0, 0.0, 0.0, 0.0)
-_LINKS: tuple[_Link, ...] = (
-    _Link(0.0, 0.0, 0.0, 0.0, 0.0, 0.0),  # J1, relative to base
-    _Link(0.0, 0.0, 0.0, 90.0, 0.0, 0.0),  # J2, relative to J1
-    _Link(0.0, 260.0, 0.0, 0.0, 0.0, 90.0),  # J3, relative to J2
-    _Link(20.0, 0.0, 0.0, -90.0, 0.0, 0.0),  # J4, relative to J3
-    _Link(0.0, 0.0, -290.0, 90.0, 0.0, 0.0),  # J5, relative to J4
-    _Link(0.0, -70.0, 0.0, -90.0, 0.0, 0.0),  # J6, relative to J5
+# Chen et al. 2025, Table 2 ("modified Denavit-Hartenberg parameters
+# of FANUC ER-4iA"), cross-validated against ROBOGUIDE's er4ia.xml
+# and this project's own limits.py -- see the module docstring.
+_DH_TABLE: tuple[_DhRow, ...] = (
+    _DhRow(alpha_prev=0.0, a_prev=0.0, d=330.0, theta_offset=0.0),  # link 1
+    _DhRow(alpha_prev=-90.0, a_prev=0.0, d=0.0, theta_offset=-90.0),  # link 2
+    _DhRow(alpha_prev=0.0, a_prev=260.0, d=0.0, theta_offset=0.0),  # link 3
+    _DhRow(alpha_prev=-90.0, a_prev=20.0, d=290.0, theta_offset=0.0),  # link 4
+    _DhRow(alpha_prev=90.0, a_prev=0.0, d=0.0, theta_offset=0.0),  # link 5
+    _DhRow(alpha_prev=-90.0, a_prev=0.0, d=70.0, theta_offset=0.0),  # link 6
 )
-_FLANGE = _Link(0.0, 0.0, 0.0, 180.0, 0.0, 0.0)  # tool flange, relative to J6
 
-_NUM_JOINTS = len(_LINKS)
+# Fixed rotation from the DH chain's frame 6 to the tool flange
+# orientation that fanuc.types.Pose's W/P/R describes. Carried over
+# from the er4ia.xml SETGN chain's FP node; unlike the translation
+# values above, this specific rotation has no independent
+# cross-validation -- see the module docstring's orientation caveat.
+_FLANGE_ROTATION_W_DEG = 180.0
 
-
-def _link_transform(link: _Link) -> Matrix:
-    return _matmul(_translation(link.dx, link.dy, link.dz), _rotation_wpr(link.w, link.p, link.r))
+_NUM_JOINTS = len(_DH_TABLE)
 
 
 def _fk_matrix(joint_deg: Sequence[float]) -> Matrix:
-    t = _link_transform(_BASE)
-    for link, theta in zip(_LINKS, joint_deg):
-        t = _matmul(t, _link_transform(link))
-        t = _matmul(t, _rotation_z(theta))
-    t = _matmul(t, _link_transform(_FLANGE))
-    return t
+    t = _IDENTITY
+    for row, commanded in zip(_DH_TABLE, joint_deg):
+        t = _matmul(t, _dh_transform(row.alpha_prev, row.a_prev, row.d, commanded + row.theta_offset))
+    w = math.radians(_FLANGE_ROTATION_W_DEG)
+    cw, sw = math.cos(w), math.sin(w)
+    flange_rx: Matrix = (
+        (1.0, 0.0, 0.0, 0.0),
+        (0.0, cw, -sw, 0.0),
+        (0.0, sw, cw, 0.0),
+        (0.0, 0.0, 0.0, 1.0),
+    )
+    return _matmul(t, flange_rx)
 
 
 def _matrix_to_wpr(t: Matrix) -> tuple[float, float, float]:

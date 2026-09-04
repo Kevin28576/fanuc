@@ -12,13 +12,20 @@ this project follows [Semantic Versioning](https://semver.org/).
   ER-4iA (`forward(joints) -> Pose`, `inverse(pose, seed=...) ->
   Joints`). Pure computation, no socket use, never called by
   `move_pose()`/`move_joint()` or anything else in `robot.py` -- a
-  fully independent module the caller opts into. Link geometry comes
-  from ROBOGUIDE's own internal `er4ia.xml` robot model (FANUC
-  publishes no DH-parameter table for this robot), cross-checked
-  against dimensions in the official Operator's Manual's
-  operating-space drawing. See the module docstring for the accuracy
-  caveats: always verify a result with `check_joint()`/`check_pose()`
-  (and ideally ROBOGUIDE) before using it for a real move.
+  fully independent module the caller opts into. Link geometry is the
+  modified Denavit-Hartenberg table published in Chen et al.,
+  "Digital twin-based self-learning decision-making framework for
+  industrial robots in manufacturing", Int J Adv Manuf Technol (2025),
+  doi:10.1007/s00170-025-15844-w -- cross-validated against both
+  ROBOGUIDE's own internal `er4ia.xml` robot model (every non-zero
+  link offset matches exactly) and this project's own
+  `limits.py` joint-limit table (read directly off a real ER-4iA's TP
+  panel). FANUC itself publishes no DH-parameter table for this
+  robot. See the module docstring for the accuracy caveats -- position
+  (X/Y/Z) rests on cross-validated values, tool-flange orientation
+  (W/P/R) does not -- and always verify a result with
+  `check_joint()`/`check_pose()` (and ideally ROBOGUIDE) before using
+  it for a real move.
 
 ## [1.1.7] - 2026-09-02
 

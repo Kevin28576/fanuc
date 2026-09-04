@@ -92,3 +92,30 @@ def test_never_imports_networking_modules() -> None:
     src = open(k.__file__, encoding="utf-8").read()
     for forbidden in ("import socket", "from .transport", "from .robot", "from . import robot"):
         assert forbidden not in src
+
+
+def test_dh_table_matches_known_link_offsets() -> None:
+    # The DH table's non-zero a/d values must stay exactly the
+    # cross-validated numbers (Chen et al. 2025 Table 2, matching
+    # ROBOGUIDE's er4ia.xml) -- a regression guard against someone
+    # "tidying up" these constants later without re-checking sources.
+    from fanuc.kinematics import _DH_TABLE
+
+    d_values = [row.d for row in _DH_TABLE]
+    a_values = [row.a_prev for row in _DH_TABLE]
+    assert d_values == [330.0, 0.0, 0.0, 290.0, 0.0, 70.0]
+    assert a_values == [0.0, 0.0, 260.0, 20.0, 0.0, 0.0]
+
+
+def test_home_joints_forward_kinematics_is_reachable_by_inverse() -> None:
+    # fanuc.limits.DEFAULT_HOME_JOINTS is a real, verified posture
+    # (read off ROBOGUIDE's Current Position panel on the actual
+    # ER-4iA used for this project). Round-tripping it is a sanity
+    # check that this module's joint ordering/units line up with the
+    # rest of the project, not just with itself.
+    from fanuc.limits import DEFAULT_HOME_JOINTS
+
+    pose = forward(DEFAULT_HOME_JOINTS)
+    solved = inverse(pose, seed=DEFAULT_HOME_JOINTS)
+    check = forward(solved)
+    assert math.dist((check.x, check.y, check.z), (pose.x, pose.y, pose.z)) < 1e-2
