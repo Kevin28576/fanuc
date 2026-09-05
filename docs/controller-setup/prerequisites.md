@@ -43,13 +43,21 @@ skipped.
 
 Need both of these:
 
-- **R632**: KAREL
-- **R648**: User Socket Messaging
+- **KAREL** (commonly R632)
+- **User Socket Messaging** (commonly R648)
 
-How to check: `MENU` → `NEXT` → `STATUS` → `Version ID` → press `ORDER FI`.
+The exact option number isn't fixed across every controller/software
+bundle -- confirmed in the field on a real ER-4iA (V9.30P/22) where
+User Socket Messaging showed up as **R636**, not R648. Match by the
+option's *name*, not the number: `MENU` → `NEXT` → `STATUS` →
+`Version ID` → press `ORDER FI` lists every installed option with its
+description text next to the number.
 
-Faster check: whether `SELECT` → `Type` has a `KAREL Programs` entry;
-if so, R632 is installed.
+Faster check for KAREL specifically: whether `SELECT` → `Type` has a
+`KAREL Programs` entry; if so, the KAREL option is installed. There's
+no equivalent shortcut for User Socket Messaging -- it doesn't get its
+own program category, so the `ORDER FI` list (or the symptom in
+"`INTP-320 Unassigned built-in`" below) is the only way to tell.
 
 If either option is missing, do a Serialize / robot options update on
 this robot in ROBOGUIDE, and add both options in the virtual robot
@@ -63,10 +71,10 @@ first tries to open its socket, it means the controller's networking
 side isn't ready for `R648` to actually talk over Ethernet, not a bug
 in this project's driver. Recheck, in order:
 
-1. **R648 (User Socket Messaging) is actually installed**, not just
-   R632; the two options are easy to conflate since both matter here,
-   but only R648 covers the socket-level communication this alarm is
-   about.
+1. **User Socket Messaging is actually installed**, not just KAREL;
+   the two options are easy to conflate since both matter here, but
+   only User Socket Messaging covers the socket-level communication
+   this alarm is about.
 2. **On real hardware** (this doesn't apply to the ROBOGUIDE virtual
    controller): the controller's Ethernet interface is physically
    connected and has an IP address configured (`MENU` → `SETUP` →
@@ -82,7 +90,38 @@ This alarm has been reported against upstream fanucpy too
 consistent with it being a controller-side prerequisite rather than
 something either driver's KAREL code can fix.
 
-Confirmed both? Continue to [server tags](server-tags.md).
+## `INTP-320 Unassigned built-in`
+
+Looks exactly like a missing option (both KAREL and User Socket
+Messaging are the usual first suspects), but confirmed in the field
+to have a different cause entirely: **the `.pc` was compiled with the
+wrong `ktrans` version for this controller.**
+
+A compiled `.pc`'s bytecode is tied to the specific system software
+version `ktrans` targeted; loading it onto a controller running a
+different version can make a perfectly ordinary built-in (this
+project hit it on `MSG_DISCO`, called from
+[`driver/mappdk_comm.kl`](../../driver/mappdk_comm.kl)) come back as
+"unassigned", even though every required option genuinely is
+installed. The alarm names the exact line
+(`INTP-320 (MAPPDK_SERVER, 51) ...`), which is what makes it look
+like a real code bug rather than a version mismatch -- checking the
+`.kl` source at that line only shows an ordinary, correctly-written
+built-in call.
+
+Check the controller's actual system software version first (`MENU`
+→ `NEXT` → `STATUS` → `Version ID`, the "Default Personality" line,
+e.g. `V9.30P/22` -- not the Boot Monitor line further down, which can
+show a different version number on the same controller). Then
+recompile with a matching `ktrans /ver` (see
+[driver/README.md](../../driver/README.md#compiling-after-a-code-change))
+and upload the result from the matching subfolder under
+[`driver/upload/`](../../driver/upload/) instead of assuming last
+time's `.pc` still applies.
+
+Confirmed both options, and the `.pc` you're loading matches this
+controller's actual version? Continue to [server
+tags](server-tags.md).
 
 ---
-*Last updated: 2026-09-02*
+*Last updated: 2026-09-05*

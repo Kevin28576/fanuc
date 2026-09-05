@@ -1,14 +1,23 @@
 # Loading the driver
 
-The files to upload are all in [driver/upload/](../../driver/upload/),
-5 of them total; no need to go up a level to `driver/` for the `.kl`
-source, that's for people editing the code, and can't be uploaded to
-the controller directly.
+The files to upload are all in [driver/upload/](../../driver/upload/);
+no need to go up a level to `driver/` for the `.kl` source, that's for
+people editing the code, and can't be uploaded to the controller
+directly.
+
+The two `.pc` files are split into per-controller-version subfolders
+(`v9.40/`, `v9.30/`, ...) -- a `.pc` compiled for the wrong version
+fails on the controller with an `INTP-320 Unassigned built-in` error,
+so check your controller's version first (`MENU` -> `NEXT` ->
+`STATUS` -> `Version ID`, the "Default Personality" line) and use the
+matching subfolder. The three `.ls` files aren't compiled, so they're
+version-independent and live at the top of `upload/`, shared by every
+version.
 
 | File | What it is |
 | --- | --- |
-| `mappdk_server.pc` | main server |
-| `mappdk_logger.pc` | second connection (skip this if you don't need S7) |
+| `<version>/mappdk_server.pc` | main server |
+| `<version>/mappdk_logger.pc` | second connection (skip this if you don't need S7) |
 | `mappdk.ls` | TP main program, starts the two above |
 | `mappdk_move.ls` | used by motion commands |
 | `mappdk_movel.ls` | used by linear motion commands |
@@ -17,8 +26,11 @@ the controller directly.
 
 `Robot_1\UD1\` under the workcell directory is the **UD1:** device
 inside the virtual controller, effectively a permanently-plugged-in
-USB drive. No real USB, no FTP needed; just copy the files in
-`driver/upload/` into `Robot_1\UD1\`.
+USB drive. No real USB, no FTP needed; just copy the matching
+version's two `.pc` files plus the three shared `.ls` files from
+`driver/upload/` into `Robot_1\UD1\` (flattened -- `UD1:` has no
+subfolders of its own, so the version split only exists in this
+repo).
 
 If ROBOGUIDE is already open, the workcell needs reopening before the
 newly copied files show up.
@@ -65,4 +77,4 @@ Entries marked `PC` are compiled KAREL and only show up under the
 Done loading? Continue to [running it](running.md).
 
 ---
-*Last updated: 2026-08-31*
+*Last updated: 2026-09-05*

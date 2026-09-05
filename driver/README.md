@@ -29,23 +29,41 @@ the included files means recompiling both main programs.
 The compiled `.pc` is what the controller actually understands; the
 `.kl` source can't be uploaded directly.
 
+**The `ktrans` version must match the controller's system software
+version** (`MENU` -> `NEXT` -> `STATUS` -> `Version ID`, the "Default
+Personality" line, e.g. `V9.30P/22`) -- not just "close enough". A
+`.pc` compiled with the wrong version fails on the controller with an
+`INTP-320 Unassigned built-in` error, even when the option it needs
+(KAREL, User Socket Messaging) is genuinely installed; that error
+looks exactly like a missing-option problem but isn't one, and cost a
+real debugging session to track down (see
+[CHANGELOG.md](../CHANGELOG.md) if it's not obvious which entry).
+
+`ktrans.exe` ships every version it knows how to target -- run it with
+no arguments to list them (`Installed versions of WinOLPC:` in its
+output) -- and `/ver` picks one explicitly:
+
 ```
 cd driver
-"C:\Program Files (x86)\FANUC\WinOLPC\bin\ktrans.exe" mappdk_server.kl
-"C:\Program Files (x86)\FANUC\WinOLPC\bin\ktrans.exe" mappdk_logger.kl
+"C:\Program Files (x86)\FANUC\WinOLPC\bin\ktrans.exe" mappdk_server.kl /ver V9.30-1
+"C:\Program Files (x86)\FANUC\WinOLPC\bin\ktrans.exe" mappdk_logger.kl /ver V9.30-1
 ```
 
-The ktrans version needs to match the controller's (this verification
-setup compiles with V9.40-1 against a V9.4099 controller). It'll
+(this project's main verification setup uses `V9.40-1` against a
+ROBOGUIDE V9.4099 virtual controller; use whichever version string
+matches your actual controller instead). Run this from an actual
+Windows shell (PowerShell/cmd) -- Git Bash rewrites a leading `/ver`
+into a bogus file path before `ktrans.exe` ever sees it. It'll also
 complain about `Unable to find 'robot.ini'` while running; that's
 expected, ignore it.
 
 The output `.pc` lands in whatever directory the command ran from,
 which is why the steps above start with `cd driver`. Once compiled,
-copy the two new `.pc` files over the old ones in `upload/`:
+copy the two new `.pc` files into the matching version subfolder
+under `upload/` (create one if your version isn't there yet):
 
 ```
-copy mappdk_server.pc mappdk_logger.pc upload\
+copy mappdk_server.pc mappdk_logger.pc upload\v9.30\
 ```
 
 Then follow [upload/README.md](upload/README.md) to upload them to
@@ -67,4 +85,4 @@ Steps, and the pitfalls in the environment setup, are in
 [docs/protocol/extending-the-driver.md](../docs/protocol/extending-the-driver.md).
 
 ---
-*Last updated: 2026-08-31*
+*Last updated: 2026-09-05*

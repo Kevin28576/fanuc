@@ -1,13 +1,20 @@
 # 載入 driver
 
-要上傳的檔案都在 [driver/upload/](../../../driver/upload/)，一共 5 個，
+要上傳的檔案都在 [driver/upload/](../../../driver/upload/)，
 不用去 `driver/` 上一層找 `.kl` 原始碼，那些是給要改程式的人看的，
 不能直接上傳到控制器。
 
+兩個 `.pc` 檔案依控制器軟體版本分成不同子資料夾（`v9.40/`、`v9.30/`
+……），版本編錯的 `.pc` 上傳到控制器會出現
+`INTP-320 Unassigned built-in`（未定義的內置函數）這種錯誤，所以先
+確認你控制器的版本（`菜單` → `NEXT` → `STATUS` → `Version ID`，看
+「Default Personality」那一行），再對應選子資料夾。三個 `.ls` 檔案
+不是編譯出來的，跟版本無關，放在 `upload/` 最上層，每個版本共用。
+
 | 檔案 | 說明 |
 | --- | --- |
-| `mappdk_server.pc` | 主 server |
-| `mappdk_logger.pc` | 第二條連線（不需要 S7 的話可以不載） |
+| `<版本>/mappdk_server.pc` | 主 server |
+| `<版本>/mappdk_logger.pc` | 第二條連線（不需要 S7 的話可以不載） |
 | `mappdk.ls` | TP 主程式，會啟動上面兩支 |
 | `mappdk_move.ls` | 動作指令用 |
 | `mappdk_movel.ls` | 直線動作指令用 |
@@ -15,8 +22,10 @@
 ## 檔案要放到 UD1:
 
 workcell 目錄下的 `Robot_1\UD1\` 在虛擬控制器裡就是 **UD1:** 裝置，
-等於一支永遠插著的隨身碟。不用真的 USB 也不用 FTP，把
-`driver/upload/` 裡的檔案複製進 `Robot_1\UD1\` 就好。
+等於一支永遠插著的隨身碟。不用真的 USB 也不用 FTP，把對應版本的兩個
+`.pc` 檔案，加上共用的三個 `.ls` 檔案，從 `driver/upload/` 複製進
+`Robot_1\UD1\`（攤平放，`UD1:` 裡沒有子資料夾，版本分類只存在於這個
+repo 裡）。
 
 ROBOGUIDE 已經開著的話，要重開 workcell 才看得到新複製進去的檔案。
 
@@ -57,4 +66,4 @@ MAPPDK_SERVER  PC
 載完，繼續看[執行](running.md)。
 
 ---
-*最後更新：2026-08-31*
+*最後更新：2026-09-05*
